@@ -10,7 +10,7 @@ function DashboardPage() {
   const { user } = useAuth();
 
   const getCareTasks = () => {
-    if (!user) return [];
+    if (!user || !user.plants || user.plants.length === 0) return [];
     return user.plants.slice(0, 2).map((plant, index) => ({
       id: plant.id,
       plantName: plant.nickname,
@@ -20,6 +20,8 @@ function DashboardPage() {
   };
 
   const careTasks = getCareTasks();
+
+  const hasCriticalAlerts = user && user.plants && user.plants.length > 0;
 
   return (
     <div className="space-y-8">
@@ -38,7 +40,7 @@ function DashboardPage() {
             <Button variant="ghost" size="sm">Ver Todos</Button>
           </CardHeader>
           <CardContent>
-            {user && user.plants.length > 0 ? (
+            {hasCriticalAlerts ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -54,7 +56,7 @@ function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                   <p className="text-muted-foreground">Nenhum alerta no momento. Suas plantas estão felizes!</p>
-                  <Button asChild variant="link" className="mt-2">
+                  <Button variant="link" className="mt-2" asChild>
                       <Link href="/add-plant">Adicionar uma nova planta</Link>
                   </Button>
               </div>
