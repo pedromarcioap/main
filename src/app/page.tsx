@@ -10,7 +10,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Apenas redirecione quando o carregamento inicial estiver concluído
+    // We only want to redirect when the auth state is no longer loading
     if (!loading) {
       if (user) {
         router.push('/dashboard');
@@ -20,7 +20,8 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
-  // Sempre mostre a tela de carregamento enquanto a verificação inicial está acontecendo
+  // Always show a loading screen while the initial auth check is happening.
+  // The useEffect above will handle redirection when loading is complete.
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
        <div className="flex flex-col items-center gap-4">

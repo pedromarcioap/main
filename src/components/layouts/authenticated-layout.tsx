@@ -43,11 +43,15 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
+    // If auth is done loading and there's no user, redirect to login.
+    // This protects routes from unauthenticated access.
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
+  // While loading, or if there's no user yet, show a loading screen.
+  // This prevents a flash of the dashboard before the user is confirmed.
   if (loading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
