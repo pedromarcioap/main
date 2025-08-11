@@ -44,9 +44,9 @@ function InfoPill({ icon: Icon, title, content }: { icon: React.ElementType; tit
 function HealthBadge({ health }: { health: string }) {
     const { icon: Icon, color, label } = useMemo(() => {
         const lowerHealth = health.toLowerCase();
-        if (lowerHealth.includes('saudável') || lowerHealth.includes('healthy')) return { icon: Smile, color: 'bg-green-500', label: 'Saudável' };
-        if (lowerHealth.includes('problemas menores') || lowerHealth.includes('minor issues')) return { icon: Meh, color: 'bg-yellow-500', label: 'Problemas Menores' };
-        if (lowerHealth.includes('não saudável') || lowerHealth.includes('unhealthy')) return { icon: Frown, color: 'bg-red-500', label: 'Não Saudável' };
+        if (lowerHealth.includes('saudável')) return { icon: Smile, color: 'bg-green-500', label: 'Saudável' };
+        if (lowerHealth.includes('problemas menores')) return { icon: Meh, color: 'bg-yellow-500', label: 'Problemas Menores' };
+        if (lowerHealth.includes('não saudável')) return { icon: Frown, color: 'bg-red-500', label: 'Não Saudável' };
         return { icon: Meh, color: 'bg-gray-500', label: 'Desconhecido' };
     }, [health]);
     
