@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import type { Plant } from '@/types';
 import Image from 'next/image';
@@ -18,7 +18,6 @@ import {
   FlaskConical,
   ClipboardList,
   Lightbulb,
-  AlertTriangle,
   Smile,
   Meh,
   Frown,
