@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { IzyBotanicLogo } from '../icons';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
@@ -32,7 +33,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
-  const { login, loading: authLoading, googleLogin } = useAuth();
+  const { login, loading, googleLogin } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,7 +70,9 @@ export function LoginForm() {
     <Card className="w-full max-w-sm shadow-xl bg-card border-none">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-black rounded-full" />
+           <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+              <IzyBotanicLogo className="w-12 h-12 text-white" />
+            </div>
         </div>
         <CardTitle className="font-headline text-3xl font-bold text-foreground">
           Bem-vindo(a) de Volta!
@@ -123,9 +126,9 @@ export function LoginForm() {
             <Button
               type="submit"
               className="w-full h-12 text-base"
-              disabled={authLoading}
+              disabled={loading}
             >
-              {authLoading ? (
+              {loading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 'Entrar'
@@ -143,17 +146,18 @@ export function LoginForm() {
           variant="outline"
           className="w-full h-12 text-base border-border justify-start font-normal text-muted-foreground"
           onClick={handleGoogleLogin}
-          disabled={authLoading}
+          disabled={loading}
         >
           <div className="w-5 h-5 mr-3 border-2 border-border rounded-full" />
           Entrar com Google
         </Button>
         <div className="mt-8 text-center text-sm">
           <span className="text-muted-foreground">Não tem uma conta? </span>
-          <Link href="/signup" legacyBehavior passHref>
-            <a className="font-semibold text-foreground hover:underline">
+          <Link
+            href="/signup"
+            className="font-semibold text-foreground hover:underline"
+          >
              Cadastre-se
-            </a>
           </Link>
         </div>
       </CardContent>
