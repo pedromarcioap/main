@@ -3,15 +3,26 @@
 import React, { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import type { User } from '@/types';
-import * as Auth from '@/lib/auth';
-import * as Storage from '@/lib/storage';
+import { auth, db } from '@/lib/firebase';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  signInWithPopup,
+  GoogleAuthProvider,
+  type User as FirebaseUser
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-  signup: (name: string, email: string, pass: string) => Promise<boolean>;
+  signup: (name: string, email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  googleLogin: () => Promise<{ success: boolean; error?: string }>;
   updateUser: (user: User) => void;
 }
 
@@ -22,66 +33,106 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    try {
-      const currentUser = Storage.getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
+  const handleUser = useCallback(async (firebaseUser: FirebaseUser | null) => {
+    if (firebaseUser) {
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        setUser({ id: userDoc.id, ...userDoc.data() } as User);
+      } else {
+        // This case can happen with Google sign-in if the user is new
+        const newUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'Usuário',
+          email: firebaseUser.email!,
+          passwordHash: '', // Not needed for Google auth
+          plants: [],
+          journal: [],
+          achievements: [],
+          chatHistory: [],
+        };
+        await setDoc(userRef, newUser);
+        setUser(newUser);
       }
-    } catch (error) {
-      console.error('Failed to load user from storage', error);
-      Storage.setCurrentUser(null);
-    } finally {
-      setLoading(false);
+    } else {
+      setUser(null);
     }
+    setLoading(false);
   }, []);
 
-  const login = useCallback(async (email: string, pass: string): Promise<boolean> => {
-    const foundUser = Storage.findUserByEmail(email);
-    if (foundUser && await Auth.verifyPassword(pass, foundUser.passwordHash)) {
-      Storage.setCurrentUser(foundUser);
-      setUser(foundUser);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, handleUser);
+    return () => unsubscribe();
+  }, [handleUser]);
+
+  const login = async (email: string, pass: string) => {
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
       router.push('/dashboard');
-      return true;
+      return { success: true };
+    } catch (error: any) {
+      console.error('Erro no login:', error);
+      return { success: false, error: error.message };
+    } finally {
+      // Loading state will be set to false by onAuthStateChanged listener
     }
-    return false;
-  }, [router]);
+  };
   
-  const logout = useCallback(() => {
-    Storage.logout();
+  const googleLogin = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      router.push('/dashboard');
+      return { success: true };
+    } catch (error: any) {
+        console.error('Erro no login com Google:', error);
+        setLoading(false);
+        return { success: false, error: error.message };
+    }
+  };
+
+  const logout = async () => {
+    await signOut(auth);
     setUser(null);
     router.push('/login');
-  }, [router]);
+  };
 
-  const signup = useCallback(async (name: string, email: string, pass:string): Promise<boolean> => {
-    if (Storage.findUserByEmail(email)) {
-      return false; // User already exists
+  const signup = async (name: string, email: string, pass:string) => {
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const firebaseUser = userCredential.user;
+      const newUser: Omit<User, 'id' | 'passwordHash'> = {
+        name,
+        email,
+        plants: [],
+        journal: [],
+        achievements: [],
+        chatHistory: [],
+      };
+      await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
+      // Let onAuthStateChanged handle setting user and loading state
+      router.push('/dashboard');
+      return { success: true };
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error);
+      setLoading(false); // Only set loading false on error, on success onAuthStateChanged handles it
+      return { success: false, error: error.message };
     }
-    const passwordHash = await Auth.hashPassword(pass);
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      name,
-      email,
-      passwordHash,
-      plants: [],
-      journal: [],
-      achievements: [],
-      chatHistory: [],
-    };
-    Storage.addUser(newUser);
-    Storage.setCurrentUser(newUser);
-    setUser(newUser);
-    router.push('/dashboard');
-    return true;
-  }, [router]);
+  };
   
-  const updateUser = useCallback((updatedUserData: User) => {
-    setUser(updatedUserData);
-    Storage.updateUser(updatedUserData);
-  }, []);
+  const updateUser = async (updatedUserData: User) => {
+    if (user) {
+      const userRef = doc(db, 'users', updatedUserData.id);
+      await setDoc(userRef, updatedUserData, { merge: true });
+      setUser(updatedUserData);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, signup, googleLogin, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

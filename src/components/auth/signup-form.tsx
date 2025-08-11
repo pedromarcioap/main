@@ -39,14 +39,12 @@ export function SignupForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const success = await signup(values.name, values.email, values.password);
-    if (success) {
-      router.push('/dashboard');
-    } else {
+    const { success, error } = await signup(values.name, values.email, values.password);
+    if (!success) {
       toast({
         variant: 'destructive',
         title: 'Falha no Cadastro',
-        description: 'Uma conta com este email já existe.',
+        description: error || 'Uma conta com este email já existe.',
       });
     }
     setIsLoading(false);
@@ -103,7 +101,7 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Conta
             </Button>
@@ -111,8 +109,10 @@ export function SignupForm() {
         </Form>
         <div className="mt-6 text-center text-sm">
           Já tem uma conta?{' '}
-          <Link href="/login" className="underline text-primary-foreground/80 hover:text-primary-foreground">
-            Entrar
+          <Link href="/login" legacyBehavior passHref>
+            <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
+             Entrar
+            </a>
           </Link>
         </div>
       </CardContent>
