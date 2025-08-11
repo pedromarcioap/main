@@ -10,6 +10,9 @@ import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Droplets } from 'lucide-react';
+import { addDays, format, isSameDay } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { Plant } from '@/types';
 
 
 function DashboardPage() {
@@ -26,6 +29,37 @@ function DashboardPage() {
       })
       .finally(() => setTipLoading(false));
   }, []);
+
+  const getCareSchedule = (plants: Plant[] | undefined) => {
+    if (!plants) return [];
+
+    const schedule: { day: Date; tasks: { plantName: string; task: string }[] }[] = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+        const day = addDays(today, i);
+        schedule.push({ day, tasks: [] });
+    }
+
+    plants.forEach(plant => {
+        const wateringFrequency = plant.wateringFrequency.toLowerCase();
+        let interval = 7; // Padrão
+        if (wateringFrequency.includes('diariamente')) interval = 1;
+        else if (wateringFrequency.includes('2-3 dias')) interval = 3;
+        else if (wateringFrequency.includes('semanalmente')) interval = 7;
+        else if (wateringFrequency.includes('a cada 2 semanas')) interval = 14;
+
+        for (let i = 0; i < 7; i++) {
+            // Simplificando a lógica de agendamento para o exemplo
+            // Uma lógica mais robusta usaria a última data de rega
+            if (i % interval === 0) {
+                 schedule[i].tasks.push({ plantName: plant.nickname, task: 'Regar' });
+            }
+        }
+    });
+
+    return schedule;
+  };
   
   if (loading) {
     return (
@@ -69,12 +103,7 @@ function DashboardPage() {
   }
 
   const criticalAlerts = user?.plants?.filter(p => p.health.toLowerCase().includes('não saudável') || p.health.toLowerCase().includes('problemas menores')) || [];
-  const upcomingTasks = user?.plants?.slice(0, 3).map(plant => ({
-    id: plant.id,
-    plantName: plant.nickname,
-    task: `Regar`,
-    schedule: plant.wateringFrequency
-  })) || [];
+  const careSchedule = getCareSchedule(user?.plants);
 
   return (
     <div className="space-y-8">
@@ -140,27 +169,26 @@ function DashboardPage() {
       <Card>
         <CardHeader className="flex flex-row items-center gap-3 pb-2">
           <CalendarDays className="h-6 w-6 text-primary" />
-          <CardTitle>Próximos Cuidados</CardTitle>
+          <CardTitle>Calendário de Cuidados (Próximos 7 dias)</CardTitle>
         </CardHeader>
         <CardContent>
-          {upcomingTasks.length > 0 ? (
-              <ul className="space-y-3">
-              {upcomingTasks.map(task => (
-                  <li key={task.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                        <Droplets className="h-5 w-5 text-blue-500" />
-                        <div>
-                            <p className="font-medium">{task.plantName}: {task.task}</p>
-                            <p className="text-sm text-muted-foreground">{task.schedule}</p>
-                        </div>
+          <div className="grid grid-cols-7 gap-2 text-center text-sm">
+            {careSchedule.map(({ day, tasks }) => (
+              <div key={day.toISOString()} className={cn("p-2 rounded-lg", isSameDay(day, new Date()) ? "bg-primary/20" : "bg-muted/50")}>
+                <p className={cn("font-bold", isSameDay(day, new Date()) ? "text-primary" : "")}>{format(day, 'E', { locale: ptBR })}</p>
+                <p className="text-xs text-muted-foreground">{format(day, 'd')}</p>
+                <div className="mt-2 space-y-1">
+                  {tasks.map((task, index) => (
+                    <div key={index} className="flex items-center gap-1.5 p-1 bg-background rounded text-xs justify-center">
+                      <Droplets className="h-3 w-3 text-blue-500" />
+                      <span className="truncate">{task.plantName}</span>
                     </div>
-                    <Button variant="outline" size="sm">Marcar como feito</Button>
-                  </li>
-              ))}
-              </ul>
-          ) : (
-              <p className="text-center text-muted-foreground py-4">Nenhuma tarefa futura. Adicione uma planta para começar!</p>
-          )}
+                  ))}
+                  {tasks.length === 0 && <div className="h-5"></div>}
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
