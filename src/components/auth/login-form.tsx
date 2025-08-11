@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,9 +32,8 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
-  const { login, googleLogin } = useAuth();
+  const { login, loading: authLoading, googleLogin } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,33 +41,28 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
     const { success, error } = await login(values.email, values.password);
     if (!success) {
       toast({
         variant: 'destructive',
         title: 'Falha no Login',
         description:
-          error === 'auth/invalid-credential'
+          error === 'auth/invalid-credential' || error === 'auth/wrong-password' || error === 'auth/user-not-found'
             ? 'Email ou senha inválidos.'
             : 'Ocorreu um erro. Por favor, tente novamente.',
       });
     }
-    // No need to redirect here, the Home page will do it.
-    setIsLoading(false);
   }
 
   async function handleGoogleLogin() {
-    setIsLoading(true);
     const { success, error } = await googleLogin();
-    if (!success) {
+     if (!success) {
       toast({
         variant: 'destructive',
         title: 'Falha no Login com Google',
-        description: 'Não foi possível fazer login com o Google.',
+        description: 'Não foi possível fazer login com o Google. Por favor, tente novamente.',
       });
     }
-    setIsLoading(false);
   }
 
   return (
@@ -130,9 +123,9 @@ export function LoginForm() {
             <Button
               type="submit"
               className="w-full h-12 text-base"
-              disabled={isLoading}
+              disabled={authLoading}
             >
-              {isLoading ? (
+              {authLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 'Entrar'
@@ -150,18 +143,17 @@ export function LoginForm() {
           variant="outline"
           className="w-full h-12 text-base border-border justify-start font-normal text-muted-foreground"
           onClick={handleGoogleLogin}
-          disabled={isLoading}
+          disabled={authLoading}
         >
           <div className="w-5 h-5 mr-3 border-2 border-border rounded-full" />
           Entrar com Google
         </Button>
         <div className="mt-8 text-center text-sm">
           <span className="text-muted-foreground">Não tem uma conta? </span>
-          <Link
-            href="/signup"
-            className="font-semibold text-foreground hover:underline"
-          >
-            Cadastre-se
+          <Link href="/signup" legacyBehavior passHref>
+            <a className="font-semibold text-foreground hover:underline">
+             Cadastre-se
+            </a>
           </Link>
         </div>
       </CardContent>

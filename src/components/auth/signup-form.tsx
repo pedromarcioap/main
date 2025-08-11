@@ -21,7 +21,7 @@ const formSchema = z.object({
 });
 
 export function SignupForm() {
-  const { signup, loading } = useAuth();
+  const { signup, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,16 +97,18 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={authLoading}>
+              {authLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Conta
             </Button>
           </form>
         </Form>
         <div className="mt-6 text-center text-sm">
           Já tem uma conta?{' '}
-          <Link href="/login" className="underline text-primary-foreground/80 hover:text-primary-foreground">
+          <Link href="/login" legacyBehavior passHref>
+            <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
               Entrar
+            </a>
           </Link>
         </div>
       </CardContent>
