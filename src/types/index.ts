@@ -23,7 +23,6 @@ export interface JournalEntry {
   plantId: string;
   date: string;
   notes: string;
-  photo?: string;
 }
 
 export interface Achievement {

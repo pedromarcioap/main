@@ -17,7 +17,7 @@ import { IzyBotanicLogo } from '@/components/icons';
 function ChatPage() {
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
-  const [messages, setMessages] = useState<ChatMessage[]>(user?.chatHistory || []);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -29,11 +29,9 @@ function ChatPage() {
   }, [user?.chatHistory]);
   
   useEffect(() => {
-    if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
-        if (viewport) {
-            viewport.scrollTop = viewport.scrollHeight;
-        }
+    const viewport = scrollAreaRef.current?.querySelector('div[data-radix-scroll-area-viewport]');
+    if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
     }
   }, [messages]);
 
@@ -42,37 +40,37 @@ function ChatPage() {
     if (!input.trim() || !user) return;
 
     const userMessage: ChatMessage = { user: input, bot: '' };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    const currentMessages = user.chatHistory || [];
+    const newMessagesForState = [...currentMessages, userMessage];
+    setMessages(newMessagesForState); // Update UI immediately
     setInput('');
     setIsLoading(true);
 
     try {
-        const plantAnalysis = user.plants.map(p => `Planta: ${p.nickname} (${p.species})\nAnálise:\n${p.fullCarePlan}`).join('\n\n');
+        const plantAnalysis = user.plants.map(p => `Planta: ${p.nickname} (${p.species})\nSaúde: ${p.health}\nPlano de Cuidados: ${p.fullCarePlan}`).join('\n\n');
         
         const response = await plantCareExpertChat({
             userMessage: input,
-            chatHistory: messages,
+            chatHistory: currentMessages, // Send previous history to AI
             plantAnalysis: plantAnalysis,
         });
 
         const newBotMessage = response.botMessage;
-        const updatedMessages = [...newMessages.slice(0, -1), { user: input, bot: newBotMessage }];
-        setMessages(updatedMessages);
-
+        const updatedMessages = [...newMessagesForState.slice(0, -1), { user: input, bot: newBotMessage }];
+        
         if (user) {
           const updatedUser = { ...user, chatHistory: updatedMessages };
           if (!user.achievements.includes('chatty-gardener')) {
             updatedUser.achievements.push('chatty-gardener');
             toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Jardineiro Tagarela"!' });
           }
-          updateUser(updatedUser);
+          await updateUser(updatedUser); // This will re-trigger the useEffect and update the state
         }
 
     } catch (error) {
         console.error('Erro no chat:', error);
         toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível obter uma resposta da Izy. Por favor, tente novamente.' });
-        setMessages(messages); // Revert to previous messages on error
+        setMessages(currentMessages); // Revert to previous messages on error
     } finally {
         setIsLoading(false);
     }
@@ -92,7 +90,7 @@ function ChatPage() {
           <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
             <div className="space-y-6">
               {messages.map((msg, index) => (
-                <div key={index}>
+                <React.Fragment key={index}>
                   <div className="flex items-start gap-3 justify-end">
                     <div className="bg-primary text-primary-foreground p-3 rounded-lg rounded-tr-none max-w-[80%]">
                       <p className="text-sm">{msg.user}</p>
@@ -112,15 +110,15 @@ function ChatPage() {
                       </div>
                     </div>
                   )}
-                </div>
+                </React.Fragment>
               ))}
-              {isLoading && !messages[messages.length-1]?.bot && (
+              {isLoading && (
                 <div className="flex items-start gap-3 justify-start">
                     <div className="h-9 w-9 border rounded-full p-1 bg-primary/20">
                         <IzyBotanicLogo className="animate-pulse" />
                     </div>
                     <div className="bg-muted p-3 rounded-lg rounded-bl-none">
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                 </div>
               )}

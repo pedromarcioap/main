@@ -21,8 +21,10 @@ import {
   Smile,
   Meh,
   Frown,
+  BookHeart,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PlantJournal } from '@/components/plants/plant-journal';
 
 
 function InfoPill({ icon: Icon, title, content }: { icon: React.ElementType; title: string; content: string }) {
@@ -91,10 +93,11 @@ function PlantDetailPage() {
 
         <div className="lg:col-span-2">
             <Tabs defaultValue="care-plan" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsList className="grid w-full grid-cols-4 mb-4">
                     <TabsTrigger value="care-plan">Plano de Cuidados</TabsTrigger>
                     <TabsTrigger value="health-diagnosis">Diagnóstico</TabsTrigger>
-                    <TabsTrigger value="expert-tips">Dicas de Especialista</TabsTrigger>
+                    <TabsTrigger value="expert-tips">Dicas</TabsTrigger>
+                    <TabsTrigger value="journal">Diário</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="care-plan">
@@ -135,6 +138,17 @@ function PlantDetailPage() {
                             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
                                 {plant.expertTips}
                             </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                 <TabsContent value="journal">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><BookHeart /> Diário da Planta</CardTitle>
+                             <CardDescription>Registre notas e acompanhe o progresso da sua planta ao longo do tempo.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <PlantJournal plantId={plant.id} />
                         </CardContent>
                     </Card>
                 </TabsContent>
