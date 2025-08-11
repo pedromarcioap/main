@@ -3,11 +3,15 @@
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CalendarDays, Lightbulb, Droplets, Sun, Leaf } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Lightbulb, Leaf } from 'lucide-react';
 import Link from 'next/link';
 import { getSeasonalTip } from '@/ai/flows/get-seasonal-tip';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Droplets } from 'lucide-react';
+
 
 function DashboardPage() {
   const { user } = useAuth();
