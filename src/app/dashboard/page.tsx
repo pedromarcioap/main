@@ -8,13 +8,12 @@ import Link from 'next/link';
 import { getSeasonalTip } from '@/ai/flows/get-seasonal-tip';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Droplets } from 'lucide-react';
 
 
 function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [seasonalTip, setSeasonalTip] = useState<string>('');
   const [tipLoading, setTipLoading] = useState(true);
 
@@ -27,6 +26,47 @@ function DashboardPage() {
       })
       .finally(() => setTipLoading(false));
   }, []);
+  
+  if (loading) {
+    return (
+        <div className="space-y-8">
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-1/2" />
+                <Skeleton className="h-5 w-1/3" />
+            </div>
+             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="lg:col-span-2">
+                    <CardHeader>
+                        <Skeleton className="h-6 w-1/3" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                         <Skeleton className="h-6 w-1/2" />
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                    </CardContent>
+                </Card>
+             </div>
+             <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/4" />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
+  }
 
   const criticalAlerts = user?.plants?.filter(p => p.health.toLowerCase().includes('não saudável') || p.health.toLowerCase().includes('problemas menores')) || [];
   const upcomingTasks = user?.plants?.slice(0, 3).map(plant => ({
