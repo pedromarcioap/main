@@ -128,10 +128,8 @@ export function LoginForm() {
         </Button>
         <div className="mt-6 text-center text-sm">
           Não tem uma conta?{' '}
-          <Link href="/signup" legacyBehavior passHref>
-            <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
+          <Link href="/signup" className="underline text-primary-foreground/80 hover:text-primary-foreground">
              Cadastre-se
-            </a>
           </Link>
         </div>
       </CardContent>

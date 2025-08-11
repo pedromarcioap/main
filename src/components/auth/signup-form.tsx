@@ -105,10 +105,8 @@ export function SignupForm() {
         </Form>
         <div className="mt-6 text-center text-sm">
           Já tem uma conta?{' '}
-          <Link href="/login" legacyBehavior passHref>
-             <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
+          <Link href="/login" className="underline text-primary-foreground/80 hover:text-primary-foreground">
               Entrar
-             </a>
           </Link>
         </div>
       </CardContent>
