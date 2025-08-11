@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      setLoading(true);
       if (firebaseUser) {
         try {
           const userRef = doc(db, 'users', firebaseUser.uid);
@@ -36,13 +35,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() } as User);
           } else {
-             // This can happen if the user was created but the doc creation failed,
-             // or for first-time social logins.
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
               email: firebaseUser.email!,
-              passwordHash: '', // Not applicable for social, empty for others
+              passwordHash: '',
               plants: [],
               journal: [],
               achievements: [],
@@ -54,11 +51,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
           console.error("Erro ao buscar dados do usuário:", error);
           setUser(null);
+        } finally {
+          setLoading(false);
         }
       } else {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

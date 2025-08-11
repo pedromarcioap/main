@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -6,8 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CalendarDays, Lightbulb, Droplets, Sun } from 'lucide-react';
 import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -24,7 +21,7 @@ function DashboardPage() {
 
   const careTasks = getCareTasks();
 
-  const hasCriticalAlerts = user && user.plants && user.plants.length > 0;
+  const hasCriticalAlerts = user?.plants && user.plants.length > 0;
 
   return (
     <div className="space-y-8">
