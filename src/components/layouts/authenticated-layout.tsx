@@ -48,7 +48,7 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
     }
   }, [user, loading, router]);
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex items-center gap-4">
@@ -59,11 +59,6 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
     );
   }
   
-  if (!user) {
-    return null; // or a redirect, but useEffect handles it.
-  }
-
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }

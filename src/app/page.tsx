@@ -10,6 +10,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    // Apenas redirecione quando o carregamento inicial estiver concluído
     if (!loading) {
       if (user) {
         router.push('/dashboard');
@@ -19,6 +20,7 @@ export default function Home() {
     }
   }, [user, loading, router]);
 
+  // Sempre mostre a tela de carregamento enquanto a verificação inicial está acontecendo
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
        <div className="flex flex-col items-center gap-4">

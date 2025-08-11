@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const updateUserInFirestore = useCallback(async (updatedUserData: User) => {
+    if (!updatedUserData) return;
     const userRef = doc(db, 'users', updatedUserData.id);
     await setDoc(userRef, updatedUserData, { merge: true });
     setUser(updatedUserData);
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-          // New user (likely via Google Sign-In)
+          // Novo usuário (provavelmente via Google Sign-In) - criamos um no Firestore.
           const newUser: User = {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || 'Usuário',
@@ -68,50 +69,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, pass: string) => {
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged vai lidar com a atualização do estado
       return { success: true };
     } catch (error: any) {
       console.error('Erro no login:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
   
   const googleLogin = async () => {
+    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      // onAuthStateChanged vai lidar com a atualização do estado
       return { success: true };
     } catch (error: any) {
       console.error('Erro no login com Google:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
 
   const signup = async (name: string, email: string, pass:string) => {
+    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const newUser: User = {
         id: userCredential.user.uid,
         name,
         email,
-        passwordHash: '', // Not storing password hash for this implementation
+        passwordHash: '', // Não estamos armazenando o hash da senha nesta implementação
         plants: [],
         journal: [],
         achievements: [],
         chatHistory: [],
       };
       await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
-      // onAuthStateChanged will handle setting the user
+      // onAuthStateChanged vai lidar com a atualização do estado
       return { success: true };
     } catch (error: any) {
       console.error('Erro no cadastro:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
   
   const logout = async () => {
     await signOut(auth);
+    // onAuthStateChanged vai lidar com a atualização do estado
   };
 
   return (
