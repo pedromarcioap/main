@@ -20,7 +20,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { IzyBotanicLogo } from '@/components/icons';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Home,
   Leaf,
@@ -49,7 +48,7 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex items-center gap-4">
@@ -59,6 +58,11 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
       </div>
     );
   }
+  
+  if (!user) {
+    return null; // or a redirect, but useEffect handles it.
+  }
+
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();

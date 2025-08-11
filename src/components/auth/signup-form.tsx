@@ -1,10 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -23,10 +21,8 @@ const formSchema = z.object({
 });
 
 export function SignupForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { signup } = useAuth();
+  const { signup, loading } = useAuth();
   const { toast } = useToast();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,7 +34,6 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
     const { success, error } = await signup(values.name, values.email, values.password);
     if (!success) {
       toast({
@@ -47,7 +42,6 @@ export function SignupForm() {
         description: error || 'Uma conta com este email já existe.',
       });
     }
-    setIsLoading(false);
   }
 
   return (
@@ -101,8 +95,8 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Conta
             </Button>
           </form>

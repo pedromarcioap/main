@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -34,8 +33,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, loading } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,7 +42,6 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
     const { success, error } = await login(values.email, values.password);
     if (!success) {
       toast({
@@ -53,11 +50,9 @@ export function LoginForm() {
         description: error || 'Email ou senha inválidos. Por favor, tente novamente.',
       });
     }
-    setIsLoading(false);
   }
 
   async function handleGoogleLogin() {
-    setIsLoading(true);
     const { success, error } = await googleLogin();
     if (!success) {
        toast({
@@ -66,7 +61,6 @@ export function LoginForm() {
         description: error || 'Não foi possível fazer login com o Google.',
       });
     }
-     setIsLoading(false);
   }
 
   return (
@@ -107,9 +101,12 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Entrar com Email
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Entrar com Email'
+              )}
             </Button>
           </form>
         </Form>
@@ -119,8 +116,8 @@ export function LoginForm() {
             <span className="text-sm text-muted-foreground">OU</span>
           </div>
         </div>
-        <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
-           {isLoading ? (
+        <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading}>
+           {loading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
            ) : (
             <GoogleIcon className="mr-2 h-5 w-5" />
@@ -129,7 +126,7 @@ export function LoginForm() {
         </Button>
         <div className="mt-6 text-center text-sm">
           Não tem uma conta?{' '}
-          <Link href="/signup" legacyBehavior passHref>
+           <Link href="/signup" legacyBehavior passHref>
              <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
               Cadastre-se
              </a>
