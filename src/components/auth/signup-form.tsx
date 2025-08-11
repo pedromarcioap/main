@@ -17,9 +17,9 @@ import { IzyBotanicLogo } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Please enter a valid email.' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+  name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
+  email: z.string().email({ message: 'Por favor, insira um email válido.' }),
+  password: z.string().min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
 });
 
 export function SignupForm() {
@@ -45,8 +45,8 @@ export function SignupForm() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Signup Failed',
-        description: 'An account with this email already exists.',
+        title: 'Falha no Cadastro',
+        description: 'Uma conta com este email já existe.',
       });
     }
     setIsLoading(false);
@@ -58,8 +58,8 @@ export function SignupForm() {
         <div className="flex justify-center mb-4">
           <IzyBotanicLogo className="w-20 h-20" />
         </div>
-        <CardTitle className="font-headline text-4xl">Join Our Community</CardTitle>
-        <CardDescription>Create an account to start your plant journey.</CardDescription>
+        <CardTitle className="font-headline text-4xl">Junte-se à Nossa Comunidade</CardTitle>
+        <CardDescription>Crie uma conta para iniciar sua jornada com plantas.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -69,9 +69,9 @@ export function SignupForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Jane Doe" {...field} />
+                    <Input placeholder="Maria Silva" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,7 +84,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,7 +95,7 @@ export function SignupForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
@@ -105,14 +105,14 @@ export function SignupForm() {
             />
             <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              Criar Conta
             </Button>
           </form>
         </Form>
         <div className="mt-6 text-center text-sm">
-          Already have an account?{' '}
+          Já tem uma conta?{' '}
           <Link href="/login" className="underline text-primary-foreground/80 hover:text-primary-foreground">
-            Log in
+            Entrar
           </Link>
         </div>
       </CardContent>

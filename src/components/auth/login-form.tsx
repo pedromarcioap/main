@@ -17,8 +17,8 @@ import { IzyBotanicLogo } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  email: z.string().email({ message: 'Por favor, insira um email válido.' }),
+  password: z.string().min(1, { message: 'A senha é obrigatória.' }),
 });
 
 export function LoginForm() {
@@ -41,8 +41,8 @@ export function LoginForm() {
     if (!success) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: 'Invalid email or password. Please try again.',
+        title: 'Falha no Login',
+        description: 'Email ou senha inválidos. Por favor, tente novamente.',
       });
     } else {
       router.push('/dashboard');
@@ -56,8 +56,8 @@ export function LoginForm() {
         <div className="flex justify-center mb-4">
           <IzyBotanicLogo className="w-20 h-20" />
         </div>
-        <CardTitle className="font-headline text-4xl">Welcome Back!</CardTitle>
-        <CardDescription>Log in to manage your green companions.</CardDescription>
+        <CardTitle className="font-headline text-4xl">Bem-vindo(a) de Volta!</CardTitle>
+        <CardDescription>Faça login para gerenciar suas companheiras verdes.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -69,7 +69,7 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -80,7 +80,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
@@ -90,14 +90,14 @@ export function LoginForm() {
             />
             <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Log In
+              Entrar
             </Button>
           </form>
         </Form>
         <div className="mt-6 text-center text-sm">
-          Don&apos;t have an account?{' '}
+          Não tem uma conta?{' '}
           <Link href="/signup" className="underline text-primary-foreground/80 hover:text-primary-foreground">
-            Sign up
+            Cadastre-se
           </Link>
         </div>
       </CardContent>

@@ -31,11 +31,11 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/dashboard', icon: Home, label: 'Dashboard' },
-  { href: '/my-plants', icon: Leaf, label: 'My Plants' },
-  { href: '/add-plant', icon: PlusSquare, label: 'Add Plant' },
-  { href: '/chat', icon: MessageCircle, label: 'AI Expert' },
-  { href: '/discover', icon: Sparkles, label: 'Discover' },
+  { href: '/dashboard', icon: Home, label: 'Painel' },
+  { href: '/my-plants', icon: Leaf, label: 'Minhas Plantas' },
+  { href: '/add-plant', icon: PlusSquare, label: 'Adicionar Planta' },
+  { href: '/chat', icon: MessageCircle, label: 'Especialista IA' },
+  { href: '/discover', icon: Sparkles, label: 'Descobrir' },
 ];
 
 export function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
@@ -54,7 +54,7 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="flex items-center gap-4">
           <IzyBotanicLogo className="w-12 h-12 animate-pulse" />
-          <p className="text-lg text-muted-foreground">Loading your garden...</p>
+          <p className="text-lg text-muted-foreground">Carregando seu jardim...</p>
         </div>
       </div>
     );
@@ -104,7 +104,7 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
           </div>
           <Button variant="ghost" className="justify-start mt-2 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0" onClick={logout}>
             <LogOut className="h-4 w-4" />
-            <span className="group-data-[collapsible=icon]:hidden ml-2">Log Out</span>
+            <span className="group-data-[collapsible=icon]:hidden ml-2">Sair</span>
           </Button>
         </SidebarFooter>
       </Sidebar>
@@ -113,7 +113,7 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
             <SidebarTrigger className="md:hidden"/>
             <div className="flex-1">
                 <h2 className="font-headline text-2xl text-primary-foreground/80">
-                    {navItems.find(item => item.href === pathname)?.label || 'Welcome'}
+                    {navItems.find(item => item.href === pathname)?.label || 'Bem-vindo(a)'}
                 </h2>
             </div>
         </header>

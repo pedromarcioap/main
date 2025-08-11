@@ -15,22 +15,22 @@ const AnalyzePlantImageInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
-      'A photo of a plant, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'      
+      "A photo of a plant, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."      
     ),
 });
 
 export type AnalyzePlantImageInput = z.infer<typeof AnalyzePlantImageInputSchema>;
 
 const AnalyzePlantImageOutputSchema = z.object({
-  species: z.string().describe('The identified species of the plant.'),
-  health: z.string().describe('An assessment of the plant\'s health.'),
-  potentialProblems: z.string().describe('Any potential problems the plant may have, such as diseases or pests.'),
-  wateringFrequency: z.string().describe('Recommended watering frequency for the plant.'),
-  sunlightNeeds: z.string().describe('The plant\'s sunlight requirements.'),
-  expertTips: z.string().describe('Expert tips for caring for the plant.'),
-  treatments: z.string().describe('Recommended treatments for any identified problems.'),
-  fullCarePlan: z.string().describe('A comprehensive care plan for the plant, including watering, sunlight, fertilization, and pruning.'),
-  potentialPestsAndDiseases: z.string().describe('A list of potential pests and diseases that may affect the plant.'),
+  species: z.string().describe('A espécie identificada da planta.'),
+  health: z.string().describe('Uma avaliação da saúde da planta. Deve ser "Saudável", "Problemas menores" ou "Não saudável"'),
+  potentialProblems: z.string().describe('Quaisquer problemas potenciais que a planta possa ter, como doenças ou pragas.'),
+  wateringFrequency: z.string().describe('Frequência de rega recomendada para a planta.'),
+  sunlightNeeds: z.string().describe('As necessidades de luz solar da planta.'),
+  expertTips: z.string().describe('Dicas de especialistas para cuidar da planta.'),
+  treatments: z.string().describe('Tratamentos recomendados para quaisquer problemas identificados.'),
+  fullCarePlan: z.string().describe('Um plano de cuidados abrangente para a planta, incluindo rega, luz solar, fertilização e poda.'),
+  potentialPestsAndDiseases: z.string().describe('Uma lista de pragas e doenças potenciais que podem afetar a planta.'),
 });
 
 export type AnalyzePlantImageOutput = z.infer<typeof AnalyzePlantImageOutputSchema>;
@@ -43,21 +43,21 @@ const analyzePlantImagePrompt = ai.definePrompt({
   name: 'analyzePlantImagePrompt',
   input: {schema: AnalyzePlantImageInputSchema},
   output: {schema: AnalyzePlantImageOutputSchema},
-  prompt: `Analyze the provided image of a plant and provide information about its species, health, potential problems, and care recommendations.
+  prompt: `Analise a imagem fornecida de uma planta e forneça informações sobre suas espécies, saúde, problemas potenciais e recomendações de cuidados em português do Brasil.
 
-   Photo: {{media url=photoDataUri}}
+   Foto: {{media url=photoDataUri}}
 
-   Specifically, return the following information:
+   Especificamente, retorne as seguintes informações:
 
-   - Species: The identified species of the plant.
-   - Health: An assessment of the plant\'s health.
-   - Potential Problems: Any potential problems the plant may have, such as diseases or pests.
-   - Watering Frequency: Recommended watering frequency for the plant.
-   - Sunlight Needs: The plant\'s sunlight requirements.
-   - Expert Tips: Expert tips for caring for the plant.
-   - Treatments: Recommended treatments for any identified problems.
-   - Full Care Plan: A comprehensive care plan for the plant, including watering, sunlight, fertilization, and pruning.
-   - Potential Pests and Diseases: A list of potential pests and diseases that may affect the plant.`,
+   - Espécie: A espécie identificada da planta.
+   - Saúde: Uma avaliação da saúde da planta. Deve ser "Saudável", "Problemas menores" ou "Não saudável".
+   - Problemas Potenciais: Quaisquer problemas potenciais que a planta possa ter, como doenças ou pragas.
+   - Frequência de Rega: Frequência de rega recomendada para a planta.
+   - Necessidades de Luz Solar: As necessidades de luz solar da planta.
+   - Dicas de Especialista: Dicas de especialistas para cuidar da planta.
+   - Tratamentos: Tratamentos recomendados para quaisquer problemas identificados.
+   - Plano de Cuidados Completo: Um plano de cuidados abrangente para a planta, incluindo rega, luz solar, fertilização e poda.
+   - Pragas e Doenças Potenciais: Uma lista de pragas e doenças potenciais que podem afetar a planta.`,
 });
 
 const analyzePlantImageFlow = ai.defineFlow(
@@ -71,4 +71,3 @@ const analyzePlantImageFlow = ai.defineFlow(
     return output!;
   }
 );
-

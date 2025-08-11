@@ -11,14 +11,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const PlantCareExpertChatInputSchema = z.object({
-  plantAnalysis: z.string().optional().describe('The plant analysis data.'),
-  chatHistory: z.array(z.object({user: z.string(), bot: z.string()})).optional().describe('The chat history.'),
-  userMessage: z.string().describe('The user message to the plant care expert.'),
+  plantAnalysis: z.string().optional().describe('Os dados da análise da planta.'),
+  chatHistory: z.array(z.object({user: z.string(), bot: z.string()})).optional().describe('O histórico do chat.'),
+  userMessage: z.string().describe('A mensagem do usuário para o especialista em cuidados com plantas.'),
 });
 export type PlantCareExpertChatInput = z.infer<typeof PlantCareExpertChatInputSchema>;
 
 const PlantCareExpertChatOutputSchema = z.object({
-  botMessage: z.string().describe('The response from the plant care expert.'),
+  botMessage: z.string().describe('A resposta do especialista em cuidados com plantas.'),
 });
 export type PlantCareExpertChatOutput = z.infer<typeof PlantCareExpertChatOutputSchema>;
 
@@ -30,15 +30,15 @@ const prompt = ai.definePrompt({
   name: 'plantCareExpertChatPrompt',
   input: {schema: PlantCareExpertChatInputSchema},
   output: {schema: PlantCareExpertChatOutputSchema},
-  prompt: `You are a helpful AI plant care expert. Your name is Izy.
+  prompt: `Você é uma IA prestativa e especialista em cuidados com plantas. Seu nome é Izy. Responda em português do Brasil.
 
-  You have access to the following information:
-  - Plant analysis: {{{plantAnalysis}}}
-  - Chat history: {{#each chatHistory}}User: {{{this.user}}}\nBot: {{{this.bot}}}\n{{/each}}
+  Você tem acesso às seguintes informações:
+  - Análise da planta: {{{plantAnalysis}}}
+  - Histórico do chat: {{#each chatHistory}}User: {{{this.user}}}\nBot: {{{this.bot}}}\n{{/each}}
 
-  The user is now asking: {{{userMessage}}}
+  O usuário está agora perguntando: {{{userMessage}}}
 
-  What is your response?`,
+  Qual é a sua resposta?`,
 });
 
 const plantCareExpertChatFlow = ai.defineFlow(

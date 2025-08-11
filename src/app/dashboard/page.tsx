@@ -15,7 +15,7 @@ export default function DashboardPage() {
     return user.plants.slice(0, 2).map((plant, index) => ({
       id: plant.id,
       plantName: plant.nickname,
-      task: index % 2 === 0 ? 'Watering' : 'Sunlight Check',
+      task: index % 2 === 0 ? 'Rega' : 'Verificação da luz solar',
       date: new Date(),
     }));
   };
@@ -26,8 +26,8 @@ export default function DashboardPage() {
     <AuthenticatedLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="font-headline text-4xl text-foreground">Welcome back, {user?.name.split(' ')[0]}!</h1>
-          <p className="text-muted-foreground mt-1">Here&apos;s what&apos;s happening in your garden today.</p>
+          <h1 className="font-headline text-4xl text-foreground">Bem-vindo(a) de volta, {user?.name.split(' ')[0]}!</h1>
+          <p className="text-muted-foreground mt-1">Veja o que está acontecendo no seu jardim hoje.</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -35,9 +35,9 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-6 w-6 text-destructive" />
-                <CardTitle>Critical Care Alerts</CardTitle>
+                <CardTitle>Alertas de Cuidado Crítico</CardTitle>
               </div>
-              <Button variant="ghost" size="sm">View All</Button>
+              <Button variant="ghost" size="sm">Ver Todos</Button>
             </CardHeader>
             <CardContent>
               {user && user.plants.length > 0 ? (
@@ -46,18 +46,18 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <Droplets className="h-5 w-5 text-destructive" />
                       <div>
-                        <p className="font-medium">{user.plants[0].nickname} needs watering.</p>
-                        <p className="text-sm text-muted-foreground">Soil is likely dry.</p>
+                        <p className="font-medium">{user.plants[0].nickname} precisa de rega.</p>
+                        <p className="text-sm text-muted-foreground">O solo provavelmente está seco.</p>
                       </div>
                     </div>
-                    <Button size="sm">Watered</Button>
+                    <Button size="sm">Regado</Button>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8">
-                    <p className="text-muted-foreground">No alerts right now. Your plants are happy!</p>
+                    <p className="text-muted-foreground">Nenhum alerta no momento. Suas plantas estão felizes!</p>
                     <Button asChild variant="link" className="mt-2">
-                        <Link href="/add-plant">Add a new plant</Link>
+                        <Link href="/add-plant">Adicionar uma nova planta</Link>
                     </Button>
                 </div>
               )}
@@ -67,11 +67,11 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center gap-3">
               <Lightbulb className="h-6 w-6 text-accent" />
-              <CardTitle>Seasonal Tip</CardTitle>
+              <CardTitle>Dica da Estação</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                As summer approaches, be mindful of increased sun exposure. You may need to move some plants to shadier spots to avoid leaf scorch.
+                Com a proximidade do verão, fique atento ao aumento da exposição solar. Pode ser necessário mover algumas plantas para locais mais sombreados para evitar queimaduras nas folhas.
               </CardDescription>
             </CardContent>
           </Card>
@@ -80,7 +80,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center gap-3">
             <CalendarDays className="h-6 w-6 text-primary" />
-            <CardTitle>Upcoming Care</CardTitle>
+            <CardTitle>Próximos Cuidados</CardTitle>
           </CardHeader>
           <CardContent>
             {careTasks.length > 0 ? (
@@ -88,15 +88,15 @@ export default function DashboardPage() {
                 {careTasks.map(task => (
                     <li key={task.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                        {task.task === 'Watering' ? <Droplets className="h-5 w-5 text-blue-500" /> : <Sun className="h-5 w-5 text-yellow-500" />}
+                        {task.task === 'Rega' ? <Droplets className="h-5 w-5 text-blue-500" /> : <Sun className="h-5 w-5 text-yellow-500" />}
                         <p><span className="font-medium">{task.plantName}</span>: {task.task}</p>
                     </div>
-                    <span className="text-sm text-muted-foreground">Today</span>
+                    <span className="text-sm text-muted-foreground">Hoje</span>
                     </li>
                 ))}
                 </ul>
             ) : (
-                <p className="text-center text-muted-foreground py-4">No upcoming tasks. Add a plant to get started!</p>
+                <p className="text-center text-muted-foreground py-4">Nenhuma tarefa futura. Adicione uma planta para começar!</p>
             )}
           </CardContent>
         </Card>

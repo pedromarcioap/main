@@ -4,26 +4,26 @@ import { Sprout, Users, Bot, BookOpenCheck } from 'lucide-react';
 export const achievements: Achievement[] = [
   {
     id: 'first-sprout',
-    title: 'First Sprout',
-    description: 'Add your very first plant to your collection.',
+    title: 'Primeiro Broto',
+    description: 'Adicione sua primeira planta à sua coleção.',
     icon: Sprout,
   },
   {
     id: 'green-thumb',
-    title: 'Green Thumb',
-    description: 'Grow your collection to 5 plants.',
+    title: 'Dedo Verde',
+    description: 'Aumente sua coleção para 5 plantas.',
     icon: Users,
   },
   {
     id: 'chatty-gardener',
-    title: 'Chatty Gardener',
-    description: 'Have your first chat with Izy, the plant expert.',
+    title: 'Jardineiro Tagarela',
+    description: 'Tenha sua primeira conversa com Izy, a especialista em plantas.',
     icon: Bot,
   },
   {
     id: 'diligent-student',
-    title: 'Diligent Student',
-    description: 'View the full care plan for one of your plants.',
+    title: 'Estudante Diligente',
+    description: 'Veja o plano de cuidados completo de uma de suas plantas.',
     icon: BookOpenCheck,
   },
 ];

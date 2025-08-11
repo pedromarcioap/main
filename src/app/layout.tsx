@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'IzyBotanic',
   description:
-    'Your personal AI-powered plant care assistant. Get expert advice, care schedules, and more.',
+    'Seu assistente pessoal de cuidados com plantas com tecnologia de IA. Obtenha conselhos de especialistas, cronogramas de cuidados e muito mais.',
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

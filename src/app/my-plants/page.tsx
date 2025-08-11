@@ -40,10 +40,10 @@ export default function MyPlantsPage() {
       ) : (
         <div className="flex flex-col items-center justify-center text-center h-[60vh] border-2 border-dashed border-border rounded-lg bg-muted/20">
             <Leaf className="w-16 h-16 text-muted-foreground" />
-            <h2 className="mt-6 text-2xl font-semibold">Your garden is empty</h2>
-            <p className="mt-2 text-muted-foreground">Add your first plant to get started with IzyBotanic.</p>
+            <h2 className="mt-6 text-2xl font-semibold">Seu jardim está vazio</h2>
+            <p className="mt-2 text-muted-foreground">Adicione sua primeira planta para começar com o IzyBotanic.</p>
             <Button asChild className="mt-6">
-                <Link href="/add-plant"><Plus className="mr-2 h-4 w-4" /> Add New Plant</Link>
+                <Link href="/add-plant"><Plus className="mr-2 h-4 w-4" /> Adicionar Nova Planta</Link>
             </Button>
         </div>
       )}

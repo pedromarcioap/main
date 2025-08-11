@@ -19,8 +19,8 @@ import { Loader2, UploadCloud, Leaf } from 'lucide-react';
 import Image from 'next/image';
 
 const formSchema = z.object({
-  nickname: z.string().min(2, { message: 'Nickname must be at least 2 characters.' }),
-  photo: z.any().refine(files => files?.length === 1, 'Plant photo is required.'),
+  nickname: z.string().min(2, { message: 'O apelido deve ter pelo menos 2 caracteres.' }),
+  photo: z.any().refine(files => files?.length === 1, 'A foto da planta é obrigatória.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -41,7 +41,7 @@ export default function AddPlantPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) { // 4MB limit for Gemini
-        toast({ variant: 'destructive', title: 'Image too large', description: 'Please upload an image smaller than 4MB.' });
+        toast({ variant: 'destructive', title: 'Imagem muito grande', description: 'Por favor, envie uma imagem menor que 4MB.' });
         form.resetField('photo');
         setPhotoPreview(null);
         return;
@@ -75,30 +75,30 @@ export default function AddPlantPage() {
           const updatedUser = { ...user, plants: [...user.plants, newPlant] };
           if (!user.achievements.includes('first-sprout')) {
             updatedUser.achievements.push('first-sprout');
-            toast({ title: 'Achievement Unlocked!', description: 'You earned "First Sprout"!' });
+            toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Primeiro Broto"!' });
           }
           if (updatedUser.plants.length >= 5 && !user.achievements.includes('green-thumb')) {
             updatedUser.achievements.push('green-thumb');
-            toast({ title: 'Achievement Unlocked!', description: 'You earned "Green Thumb"!' });
+            toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Dedo Verde"!' });
           }
           updateUser(updatedUser);
         }
 
-        toast({ title: 'Plant Added!', description: `${data.nickname} has joined your garden.` });
+        toast({ title: 'Planta Adicionada!', description: `${data.nickname} juntou-se ao seu jardim.` });
         router.push(`/my-plants/${newPlant.id}`);
 
       } catch (error) {
-        console.error('Error analyzing plant image:', error);
+        console.error('Erro ao analisar a imagem da planta:', error);
         toast({
           variant: 'destructive',
-          title: 'Analysis Failed',
-          description: 'Could not analyze the plant image. Please try again.',
+          title: 'Análise Falhou',
+          description: 'Não foi possível analisar a imagem da planta. Por favor, tente novamente.',
         });
         setIsLoading(false);
       }
     };
     reader.onerror = () => {
-       toast({ variant: 'destructive', title: 'Error', description: 'Failed to read file.'});
+       toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao ler o arquivo.'});
        setIsLoading(false);
     }
   };
@@ -107,8 +107,8 @@ export default function AddPlantPage() {
     <AuthenticatedLayout>
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Add a New Plant</CardTitle>
-          <CardDescription>Upload a photo and let our AI do the rest!</CardDescription>
+          <CardTitle>Adicionar uma Nova Planta</CardTitle>
+          <CardDescription>Envie uma foto e deixe nossa IA fazer o resto!</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -118,18 +118,18 @@ export default function AddPlantPage() {
                 name="photo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Plant Photo</FormLabel>
+                    <FormLabel>Foto da Planta</FormLabel>
                     <FormControl>
                       <div className="flex items-center justify-center w-full">
                         <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-border border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               {photoPreview ? (
-                                <Image src={photoPreview} alt="Plant preview" width={150} height={150} className="object-contain max-h-48 rounded-md" />
+                                <Image src={photoPreview} alt="Pré-visualização da planta" width={150} height={150} className="object-contain max-h-48 rounded-md" />
                               ) : (
                                 <>
                                   <UploadCloud className="w-10 h-10 mb-3 text-muted-foreground" />
-                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                  <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP (MAX. 4MB)</p>
+                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Clique para enviar</span> ou arraste e solte</p>
+                                  <p className="text-xs text-muted-foreground">PNG, JPG, ou WEBP (MÁX. 4MB)</p>
                                 </>
                               )}
                             </div>
@@ -146,9 +146,9 @@ export default function AddPlantPage() {
                 name="nickname"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nickname</FormLabel>
+                    <FormLabel>Apelido</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Fred the Fiddle Leaf" {...field} />
+                      <Input placeholder="ex: Fred, a Figueira" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,12 +158,12 @@ export default function AddPlantPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing your plant...
+                    Analisando sua planta...
                   </>
                 ) : (
                   <>
                     <Leaf className="mr-2 h-4 w-4" />
-                    Add to Garden
+                    Adicionar ao Jardim
                   </>
                 )}
               </Button>

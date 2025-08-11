@@ -51,7 +51,7 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-        const plantAnalysis = user.plants.map(p => `Plant: ${p.nickname} (${p.species})\nAnalysis:\n${p.fullCarePlan}`).join('\n\n');
+        const plantAnalysis = user.plants.map(p => `Planta: ${p.nickname} (${p.species})\nAnálise:\n${p.fullCarePlan}`).join('\n\n');
         
         const response = await plantCareExpertChat({
             userMessage: input,
@@ -66,13 +66,13 @@ export default function ChatPage() {
         const updatedUser = { ...user, chatHistory: updatedMessages };
         if (!user.achievements.includes('chatty-gardener')) {
           updatedUser.achievements.push('chatty-gardener');
-          toast({ title: 'Achievement Unlocked!', description: 'You earned "Chatty Gardener"!' });
+          toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Jardineiro Tagarela"!' });
         }
         updateUser(updatedUser);
 
     } catch (error) {
-        console.error('Chat error:', error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not get response from Izy. Please try again.' });
+        console.error('Erro no chat:', error);
+        toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível obter uma resposta da Izy. Por favor, tente novamente.' });
         setMessages(messages); // Revert to previous messages on error
     } finally {
         setIsLoading(false);
@@ -83,8 +83,8 @@ export default function ChatPage() {
     <AuthenticatedLayout>
       <Card className="h-[calc(100vh-12rem)] flex flex-col">
         <CardHeader>
-            <CardTitle>Chat with Izy</CardTitle>
-            <CardDescription>Your personal AI plant care expert.</CardDescription>
+            <CardTitle>Converse com a Izy</CardTitle>
+            <CardDescription>Sua especialista pessoal em cuidados com plantas com IA.</CardDescription>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col p-0">
           <ScrollArea className="flex-1 p-6" ref={scrollAreaRef}>
@@ -129,7 +129,7 @@ export default function ChatPage() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about plant care, pests, or anything else..."
+                placeholder="Pergunte sobre cuidados com plantas, pragas ou qualquer outra coisa..."
                 disabled={isLoading}
               />
               <Button type="submit" disabled={isLoading || !input.trim()} size="icon">

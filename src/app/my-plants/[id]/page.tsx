@@ -44,10 +44,10 @@ function InfoPill({ icon: Icon, title, content }: { icon: React.ElementType; tit
 function HealthBadge({ health }: { health: string }) {
     const { icon: Icon, color, label } = useMemo(() => {
         const lowerHealth = health.toLowerCase();
-        if (lowerHealth.includes('healthy')) return { icon: Smile, color: 'bg-green-500', label: 'Healthy' };
-        if (lowerHealth.includes('minor issues')) return { icon: Meh, color: 'bg-yellow-500', label: 'Minor Issues' };
-        if (lowerHealth.includes('unhealthy')) return { icon: Frown, color: 'bg-red-500', label: 'Unhealthy' };
-        return { icon: Meh, color: 'bg-gray-500', label: 'Unknown' };
+        if (lowerHealth.includes('saudável') || lowerHealth.includes('healthy')) return { icon: Smile, color: 'bg-green-500', label: 'Saudável' };
+        if (lowerHealth.includes('problemas menores') || lowerHealth.includes('minor issues')) return { icon: Meh, color: 'bg-yellow-500', label: 'Problemas Menores' };
+        if (lowerHealth.includes('não saudável') || lowerHealth.includes('unhealthy')) return { icon: Frown, color: 'bg-red-500', label: 'Não Saudável' };
+        return { icon: Meh, color: 'bg-gray-500', label: 'Desconhecido' };
     }, [health]);
     
     return <Badge className={`${color} text-white`}><Icon className="w-4 h-4 mr-2" />{label}</Badge>;
@@ -65,15 +65,15 @@ export default function PlantDetailPage() {
     if (user && plant && !user.achievements.includes('diligent-student')) {
       const updatedUser = { ...user, achievements: [...user.achievements, 'diligent-student'] };
       updateUser(updatedUser);
-      toast({ title: 'Achievement Unlocked!', description: 'You earned "Diligent Student"!' });
+      toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Estudante Diligente"!' });
     }
   }, [user, plant, updateUser, toast]);
 
   if (!user) return <AuthenticatedLayout><Skeleton className="w-full h-screen" /></AuthenticatedLayout>;
   if (!plant) {
-    // This can happen briefly on load, or if the ID is invalid.
-    // If it's not a brief load, we could redirect.
-    return <AuthenticatedLayout><p>Plant not found.</p></AuthenticatedLayout>;
+    // Isso pode acontecer brevemente no carregamento, ou se o ID for inválido.
+    // Se não for um carregamento breve, poderíamos redirecionar.
+    return <AuthenticatedLayout><p>Planta não encontrada.</p></AuthenticatedLayout>;
   }
 
   return (
@@ -99,21 +99,21 @@ export default function PlantDetailPage() {
         <div className="lg:col-span-2">
             <Tabs defaultValue="care-plan" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 mb-4">
-                    <TabsTrigger value="care-plan">Care Plan</TabsTrigger>
-                    <TabsTrigger value="health-diagnosis">Health</TabsTrigger>
-                    <TabsTrigger value="expert-tips">Expert Tips</TabsTrigger>
+                    <TabsTrigger value="care-plan">Plano de Cuidados</TabsTrigger>
+                    <TabsTrigger value="health-diagnosis">Diagnóstico</TabsTrigger>
+                    <TabsTrigger value="expert-tips">Dicas de Especialista</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="care-plan">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><ClipboardList /> Full Care Plan</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><ClipboardList /> Plano de Cuidados Completo</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <InfoPill icon={Droplets} title="Watering" content={plant.wateringFrequency} />
-                            <InfoPill icon={Sun} title="Sunlight" content={plant.sunlightNeeds} />
+                            <InfoPill icon={Droplets} title="Rega" content={plant.wateringFrequency} />
+                            <InfoPill icon={Sun} title="Luz Solar" content={plant.sunlightNeeds} />
                             <div className="p-4 bg-muted/50 rounded-lg">
-                                <h4 className="font-semibold text-foreground mb-2">Detailed Instructions</h4>
+                                <h4 className="font-semibold text-foreground mb-2">Instruções Detalhadas</h4>
                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{plant.fullCarePlan}</p>
                             </div>
                         </CardContent>
@@ -123,12 +123,12 @@ export default function PlantDetailPage() {
                 <TabsContent value="health-diagnosis">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><HeartPulse /> Health Diagnosis</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><HeartPulse /> Diagnóstico de Saúde</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <InfoPill icon={Stethoscope} title="Potential Problems" content={plant.potentialProblems} />
-                            <InfoPill icon={FlaskConical} title="Recommended Treatments" content={plant.treatments} />
-                            <InfoPill icon={Bug} title="Pests & Diseases" content={plant.potentialPestsAndDiseases} />
+                            <InfoPill icon={Stethoscope} title="Problemas Potenciais" content={plant.potentialProblems} />
+                            <InfoPill icon={FlaskConical} title="Tratamentos Recomendados" content={plant.treatments} />
+                            <InfoPill icon={Bug} title="Pragas e Doenças" content={plant.potentialPestsAndDiseases} />
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -136,7 +136,7 @@ export default function PlantDetailPage() {
                 <TabsContent value="expert-tips">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Lightbulb /> Expert Tips</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><Lightbulb /> Dicas de Especialista</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">

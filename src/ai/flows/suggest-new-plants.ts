@@ -14,17 +14,17 @@ import {z} from 'genkit';
 const SuggestNewPlantsInputSchema = z.object({
   userCollection: z
     .string()
-    .describe('A description of the user existing plant collection.'),
+    .describe('Uma descrição da coleção de plantas existente do usuário.'),
   userPreferences: z
     .string()
-    .describe('The user preferences like lighting conditions, care level, etc.'),
+    .describe('As preferências do usuário como condições de iluminação, nível de cuidado, etc.'),
 });
 export type SuggestNewPlantsInput = z.infer<typeof SuggestNewPlantsInputSchema>;
 
 const SuggestNewPlantsOutputSchema = z.object({
   suggestedPlants: z
     .string()
-    .describe('A list of plant suggestions with descriptions.'),
+    .describe('Uma lista de sugestões de plantas com descrições.'),
 });
 export type SuggestNewPlantsOutput = z.infer<typeof SuggestNewPlantsOutputSchema>;
 
@@ -36,12 +36,12 @@ const prompt = ai.definePrompt({
   name: 'suggestNewPlantsPrompt',
   input: {schema: SuggestNewPlantsInputSchema},
   output: {schema: SuggestNewPlantsOutputSchema},
-  prompt: `You are a gardening expert. A user has the following plant collection and preferences:
+  prompt: `Você é um especialista em jardinagem. Um usuário tem a seguinte coleção de plantas e preferências. Responda em português do Brasil:
 
-Collection: {{{userCollection}}}
-Preferences: {{{userPreferences}}}
+Coleção: {{{userCollection}}}
+Preferências: {{{userPreferences}}}
 
-Suggest some new plants that the user might like. Return the plant suggestions with a short description. Consider suggesting plants that thrive in similar conditions and complement the user's existing collection. Focus on plants that would expand the garden with compatible species.`,
+Sugira algumas plantas novas que o usuário possa gostar. Retorne as sugestões de plantas com uma breve descrição. Considere sugerir plantas que prosperam em condições semelhantes e complementam a coleção existente do usuário. Foque em plantas que expandiriam o jardim com espécies compatíveis.`,
 });
 
 const suggestNewPlantsFlow = ai.defineFlow(

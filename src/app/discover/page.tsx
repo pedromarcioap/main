@@ -24,15 +24,15 @@ export default function DiscoverPage() {
     setSuggestions(null);
 
     try {
-      const userCollection = user.plants.map(p => `${p.nickname} (${p.species})`).join(', ') || 'No plants yet.';
-      const userPreferences = 'Likes low-maintenance indoor plants.'; // This could be dynamic in a future version
+      const userCollection = user.plants.map(p => `${p.nickname} (${p.species})`).join(', ') || 'Nenhuma planta ainda.';
+      const userPreferences = 'Gosta de plantas de interior de baixa manutenção.'; // Pode ser dinâmico em uma versão futura
 
       const result = await suggestNewPlants({ userCollection, userPreferences });
       setSuggestions(result.suggestedPlants);
 
     } catch (error) {
-      console.error('Error getting suggestions:', error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not get plant suggestions. Please try again.' });
+      console.error('Erro ao obter sugestões:', error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível obter sugestões de plantas. Por favor, tente novamente.' });
     } finally {
       setIsLoading(false);
     }
@@ -45,25 +45,25 @@ export default function DiscoverPage() {
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Lightbulb /> Plant Suggestions</CardTitle>
-            <CardDescription>Get AI-powered recommendations for your next green friend based on your collection.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Lightbulb /> Sugestões de Plantas</CardTitle>
+            <CardDescription>Receba recomendações com IA para sua próxima amiga verde com base na sua coleção.</CardDescription>
           </CardHeader>
           <CardContent>
             {suggestions ? (
               <div className="space-y-4 text-sm text-muted-foreground whitespace-pre-wrap">{suggestions}</div>
             ) : (
                 <div className="text-center py-4">
-                    <p className="text-muted-foreground">Click the button to get new plant ideas!</p>
+                    <p className="text-muted-foreground">Clique no botão para obter novas ideias de plantas!</p>
                 </div>
             )}
             <Button onClick={handleGetSuggestions} disabled={isLoading} className="w-full mt-6">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Ideas...
+                  Gerando Ideias...
                 </>
               ) : (
-                'Suggest New Plants'
+                'Sugerir Novas Plantas'
               )}
             </Button>
           </CardContent>
@@ -71,8 +71,8 @@ export default function DiscoverPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Trophy /> Achievements</CardTitle>
-            <CardDescription>Track your progress and celebrate your gardening milestones.</CardDescription>
+            <CardTitle className="flex items-center gap-2"><Trophy /> Conquistas</CardTitle>
+            <CardDescription>Acompanhe seu progresso e celebre seus marcos na jardinagem.</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-4">
