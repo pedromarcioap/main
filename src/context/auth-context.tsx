@@ -46,9 +46,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() } as User);
           } else {
+            // This case handles users created via Google Sign-in for the first time
             const newUser: User = {
               id: firebaseUser.uid,
-              name: firebaseUser.displayName || 'User',
+              name: firebaseUser.displayName || 'Usuário',
               email: firebaseUser.email!,
               passwordHash: '',
               plants: [],
@@ -60,45 +61,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(newUser);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Erro ao buscar dados do usuário:", error);
           setUser(null);
+        } finally {
+          setLoading(false);
         }
       } else {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   const login = async (email: string, pass: string) => {
-    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       return { success: true };
     } catch (error: any) {
-      console.error('Login Error:', error);
-      setLoading(false);
+      console.error('Erro de Login:', error);
       return { success: false, error: error.code };
     }
   };
   
   const googleLogin = async () => {
-    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       return { success: true };
     } catch (error: any) {
-      console.error('Google Login Error:', error);
-      setLoading(false);
+      console.error('Erro de Login com Google:', error);
       return { success: false, error: error.code };
     }
   };
 
   const signup = async (name: string, email: string, pass:string) => {
-    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const newUser: User = {
@@ -112,10 +110,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         chatHistory: [],
       };
       await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
+      // Let onAuthStateChanged handle setting the user state
       return { success: true };
     } catch (error: any) {
-      console.error('Signup Error:', error);
-      setLoading(false);
+      console.error('Erro de Cadastro:', error);
       return { success: false, error: error.code };
     }
   };

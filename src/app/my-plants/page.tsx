@@ -1,6 +1,5 @@
 'use client';
 
-import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,4 +50,4 @@ function MyPlantsPage() {
   );
 }
 
-export default withAuth(MyPlantsPage);
+export default MyPlantsPage;

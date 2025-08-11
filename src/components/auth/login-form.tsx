@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,8 +34,9 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
-  const { login, loading, googleLogin } = useAuth();
+  const { login, googleLogin } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +44,7 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     const { success, error } = await login(values.email, values.password);
     if (!success) {
       toast({
@@ -52,10 +55,13 @@ export function LoginForm() {
             ? 'Email ou senha inválidos.'
             : 'Ocorreu um erro. Por favor, tente novamente.',
       });
+      setIsLoading(false);
     }
+    // On success, the onAuthStateChanged listener in AuthContext will handle the redirect.
   }
 
   async function handleGoogleLogin() {
+    setIsLoading(true);
     const { success, error } = await googleLogin();
      if (!success) {
       toast({
@@ -63,6 +69,7 @@ export function LoginForm() {
         title: 'Falha no Login com Google',
         description: 'Não foi possível fazer login com o Google. Por favor, tente novamente.',
       });
+      setIsLoading(false);
     }
   }
 
@@ -97,6 +104,7 @@ export function LoginForm() {
                       className="bg-muted/50 border-border"
                       placeholder="nome@exemplo.com"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -117,6 +125,7 @@ export function LoginForm() {
                       className="bg-muted/50 border-border"
                       placeholder="••••••••"
                       {...field}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -126,9 +135,9 @@ export function LoginForm() {
             <Button
               type="submit"
               className="w-full h-12 text-base"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
                 'Entrar'
@@ -146,7 +155,7 @@ export function LoginForm() {
           variant="outline"
           className="w-full h-12 text-base border-border justify-start font-normal text-muted-foreground"
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={isLoading}
         >
           <div className="w-5 h-5 mr-3 border-2 border-border rounded-full" />
           Entrar com Google

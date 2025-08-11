@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,8 +22,9 @@ const formSchema = z.object({
 });
 
 export function SignupForm() {
-  const { signup, loading } = useAuth();
+  const { signup } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,6 +36,7 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     const { success, error } = await signup(values.name, values.email, values.password);
     if (!success) {
       toast({
@@ -43,7 +46,9 @@ export function SignupForm() {
             ? 'Este email já está em uso.'
             : 'Ocorreu um erro. Por favor, tente novamente.',
       });
+      setIsLoading(false);
     }
+    // On success, the onAuthStateChanged listener in AuthContext will handle the redirect.
   }
 
   return (
@@ -65,7 +70,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Maria Silva" {...field} />
+                    <Input placeholder="Maria Silva" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,7 +83,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="nome@exemplo.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -91,14 +96,14 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Conta
             </Button>
           </form>

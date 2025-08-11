@@ -1,0 +1,134 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import { IzyBotanicLogo } from '@/components/icons';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  SidebarInset,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
+} from '@/components/ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Home,
+  Leaf,
+  PlusSquare,
+  MessageCircle,
+  Sparkles,
+  LogOut,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+
+
+const navItems = [
+  { href: '/dashboard', icon: Home, label: 'Painel' },
+  { href: '/my-plants', icon: Leaf, label: 'Minhas Plantas' },
+  { href: '/add-plant', icon: PlusSquare, label: 'Adicionar Planta' },
+  { href: '/chat', icon: MessageCircle, label: 'Especialista IA' },
+  { href: '/discover', icon: Sparkles, label: 'Descobrir' },
+];
+
+export default function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <IzyBotanicLogo className="w-24 h-24 animate-pulse" />
+          <h1 className="text-2xl font-headline text-primary-foreground/80">IzyBotanic</h1>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
+
+  const currentLabel = navItems.find(item => pathname.startsWith(item.href))?.label || 'Painel';
+
+  return (
+     <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader className="p-4">
+          <div className="flex items-center gap-3">
+             <IzyBotanicLogo className="w-10 h-10" />
+            <h1 className="font-headline text-2xl group-data-[collapsible=icon]:hidden">IzyBotanic</h1>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <Link href={item.href}>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith(item.href)}
+                    tooltip={{ children: item.label, side: 'right' }}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarContent>
+        <SidebarSeparator />
+        <SidebarFooter className="p-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+                <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.name}`} alt={user?.name} />
+                <AvatarFallback>{getInitials(user?.name || 'U')}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+                <span className="text-sm font-semibold text-sidebar-foreground">{user?.name}</span>
+                <span className="text-xs text-sidebar-foreground/70">{user?.email}</span>
+            </div>
+          </div>
+          <Button variant="ghost" className="justify-start mt-2 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0" onClick={logout}>
+            <LogOut className="h-4 w-4" />
+            <span className="group-data-[collapsible=icon]:hidden ml-2">Sair</span>
+          </Button>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <header className="flex h-14 items-center gap-4 border-b bg-background/50 backdrop-blur-sm px-6 sticky top-0 z-30">
+            <SidebarTrigger className="md:hidden"/>
+            <div className="flex-1">
+                <h2 className="font-headline text-2xl text-primary-foreground/80">
+                    {currentLabel}
+                </h2>
+            </div>
+        </header>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">
+            {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { analyzePlantImage } from '@/ai/flows/analyze-plant-image';
 import type { Plant } from '@/types';
@@ -173,4 +172,4 @@ function AddPlantPage() {
   );
 }
 
-export default withAuth(AddPlantPage);
+export default AddPlantPage;

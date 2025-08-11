@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import type { Plant } from '@/types';
 import Image from 'next/image';
@@ -56,7 +55,6 @@ function HealthBadge({ health }: { health: string }) {
 function PlantDetailPage() {
   const { id } = useParams();
   const { user, updateUser } = useAuth();
-  const router = useRouter();
   const { toast } = useToast();
 
   const plant = useMemo(() => user?.plants.find((p: Plant) => p.id === id), [user, id]);
@@ -147,4 +145,4 @@ function PlantDetailPage() {
   );
 }
 
-export default withAuth(PlantDetailPage);
+export default PlantDetailPage;

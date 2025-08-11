@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { plantCareExpertChat } from '@/ai/flows/plant-care-expert-chat';
 import type { ChatMessage } from '@/types';
@@ -14,8 +13,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Send, Loader2 } from 'lucide-react';
 import { IzyBotanicLogo } from '@/components/icons';
-import { cn } from '@/lib/utils';
-
 
 function ChatPage() {
   const { user, updateUser } = useAuth();
@@ -141,4 +138,4 @@ function ChatPage() {
   );
 }
 
-export default withAuth(ChatPage);
+export default ChatPage;

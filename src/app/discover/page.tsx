@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { achievements } from '@/lib/achievements';
 import { suggestNewPlants } from '@/ai/flows/suggest-new-plants';
@@ -100,4 +99,4 @@ function DiscoverPage() {
   );
 }
 
-export default withAuth(DiscoverPage);
+export default DiscoverPage;
