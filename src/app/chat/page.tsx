@@ -60,12 +60,14 @@ function ChatPage() {
         const updatedMessages = [...newMessages.slice(0, -1), { user: input, bot: newBotMessage }];
         setMessages(updatedMessages);
 
-        const updatedUser = { ...user, chatHistory: updatedMessages };
-        if (!user.achievements.includes('chatty-gardener')) {
-          updatedUser.achievements.push('chatty-gardener');
-          toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Jardineiro Tagarela"!' });
+        if (user) {
+          const updatedUser = { ...user, chatHistory: updatedMessages };
+          if (!user.achievements.includes('chatty-gardener')) {
+            updatedUser.achievements.push('chatty-gardener');
+            toast({ title: 'Conquista Desbloqueada!', description: 'Você ganhou "Jardineiro Tagarela"!' });
+          }
+          updateUser(updatedUser);
         }
-        updateUser(updatedUser);
 
     } catch (error) {
         console.error('Erro no chat:', error);
@@ -75,6 +77,10 @@ function ChatPage() {
         setIsLoading(false);
     }
   };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
 
   return (
       <Card className="h-[calc(100vh-12rem)] flex flex-col">
@@ -87,22 +93,22 @@ function ChatPage() {
             <div className="space-y-6">
               {messages.map((msg, index) => (
                 <div key={index}>
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-9 w-9 border">
-                      <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.name}`} alt={user?.name} />
-                      <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="bg-muted p-3 rounded-lg rounded-tl-none max-w-[80%]">
-                      <p className="text-sm text-foreground">{msg.user}</p>
+                  <div className="flex items-start gap-3 justify-end">
+                    <div className="bg-primary text-primary-foreground p-3 rounded-lg rounded-tr-none max-w-[80%]">
+                      <p className="text-sm">{msg.user}</p>
                     </div>
+                     <Avatar className="h-9 w-9 border">
+                      <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.name}`} alt={user?.name || ''}`} />
+                      <AvatarFallback>{getInitials(user?.name || 'U')}</AvatarFallback>
+                    </Avatar>
                   </div>
                   {msg.bot && (
                     <div className="flex items-start gap-3 mt-4 justify-start">
                         <div className="h-9 w-9 border rounded-full p-1 bg-primary/20">
                             <IzyBotanicLogo />
                         </div>
-                      <div className="bg-primary/80 text-primary-foreground p-3 rounded-lg rounded-bl-none max-w-[80%]">
-                        <p className="text-sm">{msg.bot}</p>
+                      <div className="bg-muted p-3 rounded-lg rounded-bl-none max-w-[80%]">
+                        <p className="text-sm text-foreground">{msg.bot}</p>
                       </div>
                     </div>
                   )}
@@ -113,7 +119,7 @@ function ChatPage() {
                     <div className="h-9 w-9 border rounded-full p-1 bg-primary/20">
                         <IzyBotanicLogo className="animate-pulse" />
                     </div>
-                    <div className="bg-primary/80 text-primary-foreground p-3 rounded-lg rounded-bl-none">
+                    <div className="bg-muted p-3 rounded-lg rounded-bl-none">
                         <Loader2 className="h-5 w-5 animate-spin" />
                     </div>
                 </div>
