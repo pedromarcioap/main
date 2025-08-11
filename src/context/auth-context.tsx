@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      setLoading(true); // Always start in a loading state on auth change
       if (firebaseUser) {
         try {
           const userRef = doc(db, 'users', firebaseUser.uid);
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() } as User);
           } else {
+            // This case handles users signing in via Google for the first time
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
@@ -50,13 +52,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (error) {
           console.error("Erro ao buscar dados do usuário:", error);
-          setUser(null);
+          setUser(null); // Clear user on error
         } finally {
-          setLoading(false);
+          setLoading(false); // Finish loading after fetching/creating user data
         }
       } else {
-        setUser(null);
-        setLoading(false);
+        setUser(null); // No firebase user, so no app user
+        setLoading(false); // Finish loading
       }
     });
 

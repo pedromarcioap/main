@@ -29,6 +29,7 @@ import {
   Sparkles,
   LogOut,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Painel' },
@@ -37,6 +38,19 @@ const navItems = [
   { href: '/chat', icon: MessageCircle, label: 'Especialista IA' },
   { href: '/discover', icon: Sparkles, label: 'Descobrir' },
 ];
+
+function FullScreenLoader() {
+ return (
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <IzyBotanicLogo className="w-24 h-24 animate-pulse" />
+        <h1 className="text-2xl font-headline text-foreground/80">IzyBotanic</h1>
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    </div>
+  );
+}
+
 
 export default function AppLayout({
   children,
@@ -48,24 +62,29 @@ export default function AppLayout({
   const pathname = usePathname();
 
   useEffect(() => {
+    // This effect handles redirection based on auth state.
+    // It will only run once the initial loading is complete.
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <IzyBotanicLogo className="w-24 h-24 animate-pulse" />
-          <h1 className="text-2xl font-headline text-primary-foreground/80">IzyBotanic</h1>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
+  // While the auth state is loading, show a full-screen loader.
+  // This prevents any rendering of the main layout or child pages,
+  // avoiding hydration errors and content flashes.
+  if (loading) {
+    return <FullScreenLoader />;
+  }
+
+  // If loading is finished but there is still no user,
+  // we return the loader to prevent flashing the login page
+  // before the redirection effect kicks in.
+  if (!user) {
+    return <FullScreenLoader />;
   }
   
   const getInitials = (name: string) => {
+    if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
 
@@ -106,12 +125,12 @@ export default function AppLayout({
         <SidebarFooter className="p-4">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-                <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.name}`} alt={user?.name || ''} />
-                <AvatarFallback>{getInitials(user?.name || 'U')}</AvatarFallback>
+                <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.name}`} alt={user.name} />
+                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                <span className="text-sm font-semibold text-sidebar-foreground">{user?.name}</span>
-                <span className="text-xs text-sidebar-foreground/70">{user?.email}</span>
+                <span className="text-sm font-semibold text-sidebar-foreground">{user.name}</span>
+                <span className="text-xs text-sidebar-foreground/70">{user.email}</span>
             </div>
           </div>
           <Button variant="ghost" className="justify-start mt-2 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0" onClick={handleLogout}>
@@ -124,7 +143,7 @@ export default function AppLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-background/50 backdrop-blur-sm px-6 sticky top-0 z-30">
             <SidebarTrigger className="md:hidden"/>
             <div className="flex-1">
-                <h2 className="font-headline text-2xl text-primary-foreground/80">
+                <h2 className="font-headline text-2xl text-foreground/80">
                     {currentLabel}
                 </h2>
             </div>

@@ -16,7 +16,7 @@ import type { Plant } from '@/types';
 
 
 function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth(); // No longer need loading state here, layout handles it
   const [seasonalTip, setSeasonalTip] = useState<string>('');
   const [tipLoading, setTipLoading] = useState(true);
 
@@ -61,47 +61,7 @@ function DashboardPage() {
     return schedule;
   };
   
-  if (loading) {
-    return (
-        <div className="space-y-8">
-            <div className="space-y-2">
-                <Skeleton className="h-10 w-1/2" />
-                <Skeleton className="h-5 w-1/3" />
-            </div>
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <Skeleton className="h-6 w-1/3" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-16 w-full" />
-                        <Skeleton className="h-16 w-full" />
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                         <Skeleton className="h-6 w-1/2" />
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
-                    </CardContent>
-                </Card>
-             </div>
-             <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </CardContent>
-            </Card>
-        </div>
-    )
-  }
-
+  // The layout ensures user is loaded, so we can safely access user properties.
   const criticalAlerts = user?.plants?.filter(p => p.health.toLowerCase().includes('não saudável') || p.health.toLowerCase().includes('problemas menores')) || [];
   const careSchedule = getCareSchedule(user?.plants);
 
@@ -137,9 +97,9 @@ function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">Nenhum alerta no momento. Suas plantas estão felizes!</p>
-                <Button asChild variant="link" className="mt-2">
-                    <Link href="/add-plant">Adicionar uma nova planta</Link>
-                </Button>
+                  <Button asChild variant="link" className="mt-2">
+                      <Link href="/add-plant">Adicionar uma nova planta</Link>
+                  </Button>
               </div>
             )}
           </CardContent>
