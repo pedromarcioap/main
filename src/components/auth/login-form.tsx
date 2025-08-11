@@ -47,7 +47,9 @@ export function LoginForm() {
       toast({
         variant: 'destructive',
         title: 'Falha no Login',
-        description: error || 'Email ou senha inválidos. Por favor, tente novamente.',
+        description: error === 'auth/invalid-credential' 
+            ? 'Email ou senha inválidos.' 
+            : 'Ocorreu um erro. Por favor, tente novamente.',
       });
     }
   }
@@ -58,7 +60,7 @@ export function LoginForm() {
        toast({
         variant: 'destructive',
         title: 'Falha no Login com Google',
-        description: error || 'Não foi possível fazer login com o Google.',
+        description: 'Não foi possível fazer login com o Google.',
       });
     }
   }
@@ -126,10 +128,10 @@ export function LoginForm() {
         </Button>
         <div className="mt-6 text-center text-sm">
           Não tem uma conta?{' '}
-           <Link href="/signup" legacyBehavior passHref>
-             <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
-              Cadastre-se
-             </a>
+          <Link href="/signup" legacyBehavior passHref>
+            <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
+             Cadastre-se
+            </a>
           </Link>
         </div>
       </CardContent>

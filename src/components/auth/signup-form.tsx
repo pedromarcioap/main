@@ -39,7 +39,9 @@ export function SignupForm() {
       toast({
         variant: 'destructive',
         title: 'Falha no Cadastro',
-        description: error || 'Uma conta com este email já existe.',
+        description: error === 'auth/email-already-in-use' 
+            ? 'Este email já está em uso.'
+            : 'Ocorreu um erro. Por favor, tente novamente.',
       });
     }
   }
@@ -104,9 +106,9 @@ export function SignupForm() {
         <div className="mt-6 text-center text-sm">
           Já tem uma conta?{' '}
           <Link href="/login" legacyBehavior passHref>
-            <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
-             Entrar
-            </a>
+             <a className="underline text-primary-foreground/80 hover:text-primary-foreground">
+              Entrar
+             </a>
           </Link>
         </div>
       </CardContent>
