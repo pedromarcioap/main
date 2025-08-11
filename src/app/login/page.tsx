@@ -17,6 +17,8 @@ function LoginPage() {
     }
   }, [user, loading, router]);
   
+  // Display a loading screen while auth state is being determined,
+  // or if the user is already logged in and waiting for redirect.
   if (loading || user) {
      return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -29,6 +31,7 @@ function LoginPage() {
     );
   }
 
+  // Only render the login form if not loading and no user is found.
   return (
     <main className="flex items-center justify-center min-h-screen bg-background p-4">
       <LoginForm />

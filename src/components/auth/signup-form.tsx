@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import Link from 'next/link';
 
-import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { IzyBotanicLogo } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
 
+import { auth, db } from '@/lib/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import type { User } from '@/types';
+
+
 const formSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
@@ -22,9 +28,9 @@ const formSchema = z.object({
 });
 
 export function SignupForm() {
-  const { signup } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,18 +43,31 @@ export function SignupForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const { success, error } = await signup(values.name, values.email, values.password);
-    if (!success) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const newUser: User = {
+        id: userCredential.user.uid,
+        name: values.name,
+        email: values.email,
+        passwordHash: '', 
+        plants: [],
+        journal: [],
+        achievements: [],
+        chatHistory: [],
+      };
+      await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
+      router.push('/dashboard');
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Falha no Cadastro',
-        description: error === 'auth/email-already-in-use' 
+        description: error.code === 'auth/email-already-in-use' 
             ? 'Este email já está em uso.'
             : 'Ocorreu um erro. Por favor, tente novamente.',
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
-    // On success, the onAuthStateChanged listener in AuthContext will handle the redirect.
   }
 
   return (

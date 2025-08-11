@@ -3,24 +3,13 @@
 import React, { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User } from '@/types';
 import { auth, db } from '@/lib/firebase';
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  signInWithPopup,
-  GoogleAuthProvider,
-  type User as FirebaseUser
-} from 'firebase/auth';
+import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
-  signup: (name: string, email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-  googleLogin: () => Promise<{ success: boolean; error?: string }>;
   updateUser: (user: User) => Promise<void>;
 }
 
@@ -39,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      setLoading(true);
       if (firebaseUser) {
         try {
           const userRef = doc(db, 'users', firebaseUser.uid);
@@ -46,12 +36,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() } as User);
           } else {
-            // This case handles users created via Google Sign-in for the first time
+             // This can happen if the user was created but the doc creation failed,
+             // or for first-time social logins.
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
               email: firebaseUser.email!,
-              passwordHash: '',
+              passwordHash: '', // Not applicable for social, empty for others
               plants: [],
               journal: [],
               achievements: [],
@@ -63,67 +54,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
           console.error("Erro ao buscar dados do usuário:", error);
           setUser(null);
-        } finally {
-          setLoading(false);
         }
       } else {
         setUser(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, pass: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      return { success: true };
-    } catch (error: any) {
-      console.error('Erro de Login:', error);
-      return { success: false, error: error.code };
-    }
-  };
-  
-  const googleLogin = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      return { success: true };
-    } catch (error: any) {
-      console.error('Erro de Login com Google:', error);
-      return { success: false, error: error.code };
-    }
-  };
-
-  const signup = async (name: string, email: string, pass:string) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-      const newUser: User = {
-        id: userCredential.user.uid,
-        name,
-        email,
-        passwordHash: '', 
-        plants: [],
-        journal: [],
-        achievements: [],
-        chatHistory: [],
-      };
-      await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
-      // Let onAuthStateChanged handle setting the user state
-      return { success: true };
-    } catch (error: any) {
-      console.error('Erro de Cadastro:', error);
-      return { success: false, error: error.code };
-    }
-  };
-  
   const logout = async () => {
     await signOut(auth);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signup, googleLogin, updateUser: updateUserInFirestore }}>
+    <AuthContext.Provider value={{ user, loading, logout, updateUser: updateUserInFirestore }}>
       {children}
     </AuthContext.Provider>
   );

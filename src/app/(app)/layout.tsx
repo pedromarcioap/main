@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+
 import { useAuth } from '@/hooks/use-auth';
 import { IzyBotanicLogo } from '@/components/icons';
+import { Button } from '@/components/ui/button';
 import {
   SidebarProvider,
   Sidebar,
@@ -26,10 +29,6 @@ import {
   Sparkles,
   LogOut,
 } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Painel' },
@@ -72,6 +71,11 @@ export default function AppLayout({
 
   const currentLabel = navItems.find(item => pathname.startsWith(item.href))?.label || 'Painel';
 
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  }
+
   return (
      <SidebarProvider>
       <Sidebar>
@@ -110,7 +114,7 @@ export default function AppLayout({
                 <span className="text-xs text-sidebar-foreground/70">{user?.email}</span>
             </div>
           </div>
-          <Button variant="ghost" className="justify-start mt-2 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0" onClick={logout}>
+          <Button variant="ghost" className="justify-start mt-2 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             <span className="group-data-[collapsible=icon]:hidden ml-2">Sair</span>
           </Button>
