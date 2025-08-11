@@ -1,0 +1,103 @@
+'use client';
+
+import React, { useState } from 'react';
+import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import { useAuth } from '@/hooks/use-auth';
+import { achievements } from '@/lib/achievements';
+import { suggestNewPlants } from '@/ai/flows/suggest-new-plants';
+
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Lightbulb, Trophy, CheckCircle2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+export default function DiscoverPage() {
+  const { user } = useAuth();
+  const [suggestions, setSuggestions] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleGetSuggestions = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    setSuggestions(null);
+
+    try {
+      const userCollection = user.plants.map(p => `${p.nickname} (${p.species})`).join(', ') || 'No plants yet.';
+      const userPreferences = 'Likes low-maintenance indoor plants.'; // This could be dynamic in a future version
+
+      const result = await suggestNewPlants({ userCollection, userPreferences });
+      setSuggestions(result.suggestedPlants);
+
+    } catch (error) {
+      console.error('Error getting suggestions:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not get plant suggestions. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const unlockedAchievements = user?.achievements || [];
+
+  return (
+    <AuthenticatedLayout>
+      <div className="grid lg:grid-cols-2 gap-8 items-start">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Lightbulb /> Plant Suggestions</CardTitle>
+            <CardDescription>Get AI-powered recommendations for your next green friend based on your collection.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {suggestions ? (
+              <div className="space-y-4 text-sm text-muted-foreground whitespace-pre-wrap">{suggestions}</div>
+            ) : (
+                <div className="text-center py-4">
+                    <p className="text-muted-foreground">Click the button to get new plant ideas!</p>
+                </div>
+            )}
+            <Button onClick={handleGetSuggestions} disabled={isLoading} className="w-full mt-6">
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating Ideas...
+                </>
+              ) : (
+                'Suggest New Plants'
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Trophy /> Achievements</CardTitle>
+            <CardDescription>Track your progress and celebrate your gardening milestones.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {achievements.map((ach) => {
+                const isUnlocked = unlockedAchievements.includes(ach.id);
+                return (
+                  <li
+                    key={ach.id}
+                    className={`flex items-start gap-4 p-4 rounded-lg transition-all ${isUnlocked ? 'bg-primary/20' : 'bg-muted/50 opacity-60'}`}
+                  >
+                    <div className={`p-2 rounded-full ${isUnlocked ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+                      <ach.icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground">{ach.title}</h4>
+                      <p className="text-sm text-muted-foreground">{ach.description}</p>
+                    </div>
+                    {isUnlocked && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+    </AuthenticatedLayout>
+  );
+}
