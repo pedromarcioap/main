@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -5,6 +6,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CalendarDays, Lightbulb, Droplets, Sun } from 'lucide-react';
 import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -56,9 +59,9 @@ function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                   <p className="text-muted-foreground">Nenhum alerta no momento. Suas plantas estão felizes!</p>
-                  <Button variant="link" className="mt-2" asChild>
-                      <Link href="/add-plant">Adicionar uma nova planta</Link>
-                  </Button>
+                  <Link href="/add-plant" className={cn(buttonVariants({ variant: 'link' }), "mt-2")}>
+                    Adicionar uma nova planta
+                  </Link>
               </div>
             )}
           </CardContent>
