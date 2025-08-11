@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { plantCareExpertChat } from '@/ai/flows/plant-care-expert-chat';
 import type { ChatMessage } from '@/types';
@@ -17,7 +17,7 @@ import { IzyBotanicLogo } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 
-export default function ChatPage() {
+function ChatPage() {
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>(user?.chatHistory || []);
@@ -80,7 +80,6 @@ export default function ChatPage() {
   };
 
   return (
-    <AuthenticatedLayout>
       <Card className="h-[calc(100vh-12rem)] flex flex-col">
         <CardHeader>
             <CardTitle>Converse com a Izy</CardTitle>
@@ -139,6 +138,7 @@ export default function ChatPage() {
           </div>
         </CardContent>
       </Card>
-    </AuthenticatedLayout>
   );
 }
+
+export default withAuth(ChatPage);

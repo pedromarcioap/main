@@ -40,24 +40,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        const userRef = doc(db, 'users', firebaseUser.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          setUser({ id: userDoc.id, ...userDoc.data() } as User);
-        } else {
-          // New user (likely via Google Sign-In) - create one in Firestore.
-          const newUser: User = {
-            id: firebaseUser.uid,
-            name: firebaseUser.displayName || 'User',
-            email: firebaseUser.email!,
-            passwordHash: '',
-            plants: [],
-            journal: [],
-            achievements: [],
-            chatHistory: [],
-          };
-          await setDoc(userRef, newUser);
-          setUser(newUser);
+        try {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            setUser({ id: userDoc.id, ...userDoc.data() } as User);
+          } else {
+            const newUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'User',
+              email: firebaseUser.email!,
+              passwordHash: '',
+              plants: [],
+              journal: [],
+              achievements: [],
+              chatHistory: [],
+            };
+            await setDoc(userRef, newUser);
+            setUser(newUser);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
         }
       } else {
         setUser(null);
@@ -69,29 +73,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, pass: string) => {
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      // onAuthStateChanged will handle the user state update
       return { success: true };
     } catch (error: any) {
       console.error('Login Error:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
   
   const googleLogin = async () => {
+    setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state update
       return { success: true };
     } catch (error: any) {
       console.error('Google Login Error:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
 
   const signup = async (name: string, email: string, pass:string) => {
+    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const newUser: User = {
@@ -105,17 +112,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         chatHistory: [],
       };
       await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
-      // onAuthStateChanged will handle the user state update
       return { success: true };
     } catch (error: any) {
       console.error('Signup Error:', error);
+      setLoading(false);
       return { success: false, error: error.code };
     }
   };
   
   const logout = async () => {
     await signOut(auth);
-    // onAuthStateChanged will handle setting user to null
   };
 
   return (

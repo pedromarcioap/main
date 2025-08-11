@@ -1,6 +1,6 @@
 'use client';
 
-import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Leaf } from 'lucide-react';
 
-export default function MyPlantsPage() {
+function MyPlantsPage() {
   const { user } = useAuth();
   
   return (
-    <AuthenticatedLayout>
+      <>
       {user && user.plants.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {user.plants.map((plant) => (
@@ -47,6 +47,8 @@ export default function MyPlantsPage() {
             </Button>
         </div>
       )}
-    </AuthenticatedLayout>
+      </>
   );
 }
+
+export default withAuth(MyPlantsPage);

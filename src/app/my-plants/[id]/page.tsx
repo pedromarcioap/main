@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import type { Plant } from '@/types';
 import Image from 'next/image';
@@ -53,7 +53,7 @@ function HealthBadge({ health }: { health: string }) {
     return <Badge className={`${color} text-white`}><Icon className="w-4 h-4 mr-2" />{label}</Badge>;
 }
 
-export default function PlantDetailPage() {
+function PlantDetailPage() {
   const { id } = useParams();
   const { user, updateUser } = useAuth();
   const router = useRouter();
@@ -69,15 +69,11 @@ export default function PlantDetailPage() {
     }
   }, [user, plant, updateUser, toast]);
 
-  if (!user) return <AuthenticatedLayout><Skeleton className="w-full h-screen" /></AuthenticatedLayout>;
-  if (!plant) {
-    // Isso pode acontecer brevemente no carregamento, ou se o ID for inválido.
-    // Se não for um carregamento breve, poderíamos redirecionar.
-    return <AuthenticatedLayout><p>Planta não encontrada.</p></AuthenticatedLayout>;
+  if (!user || !plant) {
+    return <Skeleton className="w-full h-screen" />;
   }
 
   return (
-    <AuthenticatedLayout>
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <Card className="overflow-hidden">
@@ -148,6 +144,7 @@ export default function PlantDetailPage() {
             </Tabs>
         </div>
       </div>
-    </AuthenticatedLayout>
   );
 }
+
+export default withAuth(PlantDetailPage);

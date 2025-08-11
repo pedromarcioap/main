@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { achievements } from '@/lib/achievements';
 import { suggestNewPlants } from '@/ai/flows/suggest-new-plants';
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Lightbulb, Trophy, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export default function DiscoverPage() {
+function DiscoverPage() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +41,6 @@ export default function DiscoverPage() {
   const unlockedAchievements = user?.achievements || [];
 
   return (
-    <AuthenticatedLayout>
       <div className="grid lg:grid-cols-2 gap-8 items-start">
         <Card>
           <CardHeader>
@@ -98,6 +97,7 @@ export default function DiscoverPage() {
           </CardContent>
         </Card>
       </div>
-    </AuthenticatedLayout>
   );
 }
+
+export default withAuth(DiscoverPage);

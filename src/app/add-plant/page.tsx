@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
+import withAuth from '@/components/auth/with-auth';
 import { useAuth } from '@/hooks/use-auth';
 import { analyzePlantImage } from '@/ai/flows/analyze-plant-image';
 import type { Plant } from '@/types';
@@ -25,7 +25,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function AddPlantPage() {
+function AddPlantPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { user, updateUser } = useAuth();
@@ -104,7 +104,6 @@ export default function AddPlantPage() {
   };
 
   return (
-    <AuthenticatedLayout>
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Adicionar uma Nova Planta</CardTitle>
@@ -171,6 +170,7 @@ export default function AddPlantPage() {
           </Form>
         </CardContent>
       </Card>
-    </AuthenticatedLayout>
   );
 }
+
+export default withAuth(AddPlantPage);
