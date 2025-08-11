@@ -58,9 +58,9 @@ function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                   <p className="text-muted-foreground">Nenhum alerta no momento. Suas plantas estão felizes!</p>
-                  <Link href="/add-plant" className={cn(buttonVariants({ variant: 'link' }), "mt-2")}>
-                    Adicionar uma nova planta
-                  </Link>
+                  <Button asChild variant="link" className="mt-2">
+                    <Link href="/add-plant">Adicionar uma nova planta</Link>
+                  </Button>
               </div>
             )}
           </CardContent>
