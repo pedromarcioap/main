@@ -1,10 +1,9 @@
-import type { AnalyzePlantImageOutput } from "@/ai/flows/analyze-plant-image";
+import type { AnalyzePlantImageOutput } from '@/ai/flows/analyze-plant-image';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  passwordHash: string;
   plants: Plant[];
   journal: JournalEntry[];
   achievements: string[];
@@ -33,6 +32,6 @@ export interface Achievement {
 }
 
 export interface ChatMessage {
-  user: string;
-  bot: string;
+  role: 'user' | 'bot';
+  content: string;
 }

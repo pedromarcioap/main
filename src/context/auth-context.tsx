@@ -1,9 +1,19 @@
 'use client';
 
-import React, { createContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import type { User } from '@/types';
 import { auth, db } from '@/lib/firebase';
-import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  signOut,
+  type User as FirebaseUser,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface AuthContextType {
@@ -13,7 +23,9 @@ export interface AuthContextType {
   updateUser: (user: User) => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -21,27 +33,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserInFirestore = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
-    const userRef = doc(db, 'users', updatedUserData.id);
-    await setDoc(userRef, updatedUserData, { merge: true });
-    setUser(updatedUserData);
+    try {
+      const userRef = doc(db, 'users', updatedUserData.id);
+      await setDoc(userRef, updatedUserData, { merge: true });
+      setUser(updatedUserData);
+    } catch (error) {
+      console.error('Falha ao atualizar o usuário:', error);
+      // Opcional: reverter o estado local em caso de falha
+    }
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      setLoading(true); // Always start in a loading state on auth change
-      if (firebaseUser) {
-        try {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (firebaseUser: FirebaseUser | null) => {
+        if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           const userDoc = await getDoc(userRef);
+
           if (userDoc.exists()) {
             setUser({ id: userDoc.id, ...userDoc.data() } as User);
           } else {
-            // This case handles users signing in via Google for the first time
+            // Este caso lida com novos usuários, inclusive via Google
             const newUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
               email: firebaseUser.email!,
-              passwordHash: '',
               plants: [],
               journal: [],
               achievements: [],
@@ -50,17 +67,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await setDoc(userRef, newUser);
             setUser(newUser);
           }
-        } catch (error) {
-          console.error("Erro ao buscar dados do usuário:", error);
-          setUser(null); // Clear user on error
-        } finally {
-          setLoading(false); // Finish loading after fetching/creating user data
+        } else {
+          setUser(null);
         }
-      } else {
-        setUser(null); // No firebase user, so no app user
-        setLoading(false); // Finish loading
+        setLoading(false);
       }
-    });
+    );
 
     return () => unsubscribe();
   }, []);
@@ -70,9 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, logout, updateUser: updateUserInFirestore }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = { user, loading, logout, updateUser: updateUserInFirestore };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

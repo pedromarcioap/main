@@ -10,14 +10,31 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { IzyBotanicLogo } from '../icons';
 
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
@@ -27,6 +44,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,7 +62,9 @@ export function LoginForm() {
         variant: 'destructive',
         title: 'Falha no Login',
         description:
-          error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found'
+          error.code === 'auth/invalid-credential' ||
+          error.code === 'auth/wrong-password' ||
+          error.code === 'auth/user-not-found'
             ? 'Email ou senha inválidos.'
             : 'Ocorreu um erro. Por favor, tente novamente.',
       });
@@ -54,29 +74,30 @@ export function LoginForm() {
   }
 
   async function handleGoogleLogin() {
-    setIsLoading(true);
+    setIsGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push('/dashboard');
     } catch (error: any) {
-       toast({
+      toast({
         variant: 'destructive',
         title: 'Falha no Login com Google',
-        description: 'Não foi possível fazer login com o Google. Por favor, tente novamente.',
+        description:
+          'Não foi possível fazer login com o Google. Por favor, tente novamente.',
       });
     } finally {
-      setIsLoading(false);
+      setIsGoogleLoading(false);
     }
   }
 
   return (
-    <Card className="w-full max-w-sm shadow-xl bg-card border-none">
+    <Card className="w-full max-w-sm border-none bg-card shadow-xl">
       <CardHeader className="text-center">
-        <div className="flex justify-center mb-6">
-           <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
-              <IzyBotanicLogo className="w-12 h-12 text-white" />
-            </div>
+        <div className="mb-6 flex justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black">
+            <IzyBotanicLogo className="h-12 w-12 text-white" />
+          </div>
         </div>
         <CardTitle className="font-headline text-3xl font-bold text-foreground">
           Bem-vindo(a) de Volta!
@@ -93,15 +114,15 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground font-normal">
+                  <FormLabel className="font-normal text-muted-foreground">
                     Email
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="bg-muted/50 border-border"
+                      className="border-border bg-muted/50"
                       placeholder="nome@exemplo.com"
                       {...field}
-                      disabled={isLoading}
+                      disabled={isLoading || isGoogleLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -113,16 +134,16 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-muted-foreground font-normal">
+                  <FormLabel className="font-normal text-muted-foreground">
                     Senha
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      className="bg-muted/50 border-border"
+                      className="border-border bg-muted/50"
                       placeholder="••••••••"
                       {...field}
-                      disabled={isLoading}
+                      disabled={isLoading || isGoogleLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,30 +152,31 @@ export function LoginForm() {
             />
             <Button
               type="submit"
-              className="w-full h-12 text-base"
-              disabled={isLoading}
+              className="h-12 w-full text-base"
+              disabled={isLoading || isGoogleLoading}
             >
-              {isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                'Entrar'
-              )}
+              {isLoading && <Loader2 className="h-6 w-6 animate-spin" />}
+              {!isLoading && 'Entrar'}
             </Button>
           </form>
         </Form>
         <div className="relative my-6">
           <Separator />
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center bg-card px-2">
+          <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center bg-card px-2">
             <span className="text-sm text-muted-foreground">OU</span>
           </div>
         </div>
         <Button
           variant="outline"
-          className="w-full h-12 text-base border-border justify-start font-normal text-muted-foreground"
+          className="h-12 w-full justify-start border-border text-base font-normal text-muted-foreground"
           onClick={handleGoogleLogin}
-          disabled={isLoading}
+          disabled={isLoading || isGoogleLoading}
         >
-          <div className="w-5 h-5 mr-3 border-2 border-border rounded-full" />
+          {isGoogleLoading ? (
+            <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+          ) : (
+            <div className="mr-3 h-5 w-5" />
+          )}
           Entrar com Google
         </Button>
         <div className="mt-8 text-center text-sm">
@@ -163,7 +185,7 @@ export function LoginForm() {
             href="/signup"
             className="font-semibold text-foreground hover:underline"
           >
-             Cadastre-se
+            Cadastre-se
           </Link>
         </div>
       </CardContent>
