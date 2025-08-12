@@ -73,8 +73,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       .toUpperCase();
   };
 
+  const isCurrentPage = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
+  
   const currentLabel =
-    navItems.find((item) => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href)))?.label || 'Painel';
+    navItems.find((item) => isCurrentPage(item.href))?.label || 'Painel';
 
   const handleLogout = async () => {
     await logout();
@@ -98,7 +105,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href} legacyBehavior passHref>
                   <SidebarMenuButton
-                    isActive={pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))}
+                    isActive={isCurrentPage(item.href)}
                     tooltip={{ children: item.label, side: 'right' }}
                   >
                     <item.icon />
