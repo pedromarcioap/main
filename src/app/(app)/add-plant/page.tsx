@@ -88,13 +88,8 @@ function AddPlantPage() {
     try {
       const file: File = data.photo[0];
       
-      // Read the file into an ArrayBuffer.
       const arrayBuffer = await file.arrayBuffer();
-
-      // Convert the ArrayBuffer to a Base64 string.
       const base64String = Buffer.from(arrayBuffer).toString('base64');
-      
-      // Construct the Data URI.
       const photoDataUri = `data:${file.type};base64,${base64String}`;
 
       const analysisResult = await analyzePlantImage({ photoDataUri });

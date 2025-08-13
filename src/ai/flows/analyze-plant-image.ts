@@ -85,12 +85,12 @@ const analyzePlantImagePrompt = ai.definePrompt({
 
    Foto: {{media url=photoDataUri}}
 
-   Siga estritamente o schema JSON de saída. Para cada campo, forneça uma resposta clara, concisa e de alta precisão técnica.
+   Siga estritamente o schema JSON de saída. Para cada campo, forneça uma resposta clara, concisa e de alta precisão técnica. Se uma informação não for claramente visível (ex: solo), indique explicitamente "Não visível na imagem".
 
    - species: Identifique a espécie da planta com a maior precisão possível.
    - health: Avalie a saúde geral. Use apenas "Saudável", "Problemas menores" ou "Não saudável".
-   - potentialProblems: Descreva quaisquer problemas visíveis (ex: folhas amareladas, manchas, necrose, galhos secos).
-   - detailedDiagnosis: Elabore um diagnóstico detalhado. Analise a coloração e turgor das folhas para identificar potenciais deficiências nutricionais (ex: falta de nitrogênio, ferro, magnésio) ou estresse hídrico. Seja específico.
+   - potentialProblems: Descreva quaisquer problemas visíveis (ex: folhas amareladas, manchas, necrose, galhos secos). Seja detalhista.
+   - detailedDiagnosis: Elabore um diagnóstico detalhado. Analise a coloração e turgor das folhas para identificar potenciais deficiências nutricionais (ex: falta de nitrogênio, ferro, magnésio) ou estresse hídrico. Seja específico e justifique sua análise.
    - soilAnalysis: Se o solo estiver visível, analise-o. Descreva a textura aparente (arenoso, argiloso, etc.), umidade, e procure por sinais de compactação, acúmulo de sais ou matéria orgânica. Se o solo não for visível, indique "Solo não visível na imagem".
    - wateringFrequency: Com base na espécie, saúde e análise do solo, recomende a frequência de rega (ex: 'A cada 5-7 dias, quando o topo do solo estiver seco').
    - sunlightNeeds: Descreva a necessidade de luz solar da planta (ex: 'Luz solar direta por pelo menos 4 horas' ou 'Luz indireta brilhante').

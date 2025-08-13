@@ -15,7 +15,6 @@ import {
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { useToast } from '@/hooks/use-toast';
 
 export interface AuthContextType {
   user: User | null;
@@ -31,21 +30,16 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const logout = useCallback(async () => {
     try {
       await signOut(auth);
-      setUser(null);
     } catch (error) {
       console.error('Falha ao fazer logout:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro de Logout',
-        description: 'Não foi possível sair. Por favor, tente novamente.',
-      });
+    } finally {
+      setUser(null);
     }
-  }, [toast]);
+  }, []);
 
   const updateUser = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
@@ -55,19 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(updatedUserData);
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro de Sincronização',
-        description: 'Não foi possível salvar suas alterações. Verifique sua conexão.',
-      });
+      // Aqui você pode querer mostrar um toast de erro para o usuário
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
-        setLoading(true);
         if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           try {
@@ -89,23 +78,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(newUser);
             }
           } catch (error) {
-             console.error("Erro ao buscar dados do usuário do Firestore:", error);
-             // Create a basic user object to keep the app functional
-             const basicUser: User = {
-                id: firebaseUser.uid,
-                name: firebaseUser.displayName || 'Usuário',
-                email: firebaseUser.email!,
-                plants: [],
-                journal: [],
-                achievements: [],
-                chatHistory: [],
-             };
-             setUser(basicUser);
-             toast({
-                variant: 'destructive',
-                title: 'Você está offline',
-                description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
-             });
+            console.error(
+              'Erro ao buscar dados do usuário do Firestore:',
+              error
+            );
+            const basicUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || 'Usuário',
+              email: firebaseUser.email!,
+              plants: [],
+              journal: [],
+              achievements: [],
+              chatHistory: [],
+            };
+            setUser(basicUser);
           } finally {
             setLoading(false);
           }
@@ -117,7 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const value = { user, loading, logout, updateUser };
 
