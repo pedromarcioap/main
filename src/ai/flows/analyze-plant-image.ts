@@ -55,6 +55,16 @@ const AnalyzePlantImageOutputSchema = z.object({
     .describe(
       'Uma lista de pragas e doenças potenciais que podem afetar a planta.'
     ),
+  soilAnalysis: z
+    .string()
+    .describe(
+      'Uma análise do solo visível na foto, avaliando textura, umidade e sinais de compactação ou deficiências.'
+    ),
+  detailedDiagnosis: z
+    .string()
+    .describe(
+      'Um diagnóstico detalhado da saúde da planta, incluindo deficiências nutricionais, estresse hídrico e outros indicadores.'
+    ),
 });
 
 export type AnalyzePlantImageOutput = z.infer<
@@ -71,21 +81,23 @@ const analyzePlantImagePrompt = ai.definePrompt({
   name: 'analyzePlantImagePrompt',
   input: { schema: AnalyzePlantImageInputSchema },
   output: { schema: AnalyzePlantImageOutputSchema },
-  prompt: `Você é um botânico especialista. Analise a imagem fornecida de uma planta e forneça informações detalhadas e precisas em português do Brasil.
+  prompt: `Você é um botânico de última geração e especialista em agronomia. Sua tarefa é realizar uma análise minuciosa e detalhada da imagem de uma planta fornecida, respondendo em português do Brasil.
 
    Foto: {{media url=photoDataUri}}
 
-   Siga estritamente o schema JSON de saída. Para cada campo, forneça uma resposta clara e concisa.
+   Siga estritamente o schema JSON de saída. Para cada campo, forneça uma resposta clara, concisa e de alta precisão técnica.
 
-   - species: Identifique a espécie da planta.
-   - health: Avalie a saúde. Use apenas "Saudável", "Problemas menores" ou "Não saudável".
-   - potentialProblems: Descreva quaisquer problemas visíveis (ex: folhas amareladas, manchas).
-   - wateringFrequency: Recomende a frequência de rega (ex: 'A cada 7-10 dias').
-   - sunlightNeeds: Descreva a necessidade de luz solar (ex: 'Luz indireta brilhante').
-   - expertTips: Forneça dicas práticas para o cuidado desta espécie.
-   - treatments: Sugira tratamentos para os problemas identificados. Se estiver saudável, indique "Nenhum tratamento necessário".
-   - fullCarePlan: Elabore um plano de cuidados completo, abordando rega, luz, solo e fertilização.
-   - potentialPestsAndDiseases: Liste pragas e doenças comuns para esta espécie.`,
+   - species: Identifique a espécie da planta com a maior precisão possível.
+   - health: Avalie a saúde geral. Use apenas "Saudável", "Problemas menores" ou "Não saudável".
+   - potentialProblems: Descreva quaisquer problemas visíveis (ex: folhas amareladas, manchas, necrose, galhos secos).
+   - detailedDiagnosis: Elabore um diagnóstico detalhado. Analise a coloração e turgor das folhas para identificar potenciais deficiências nutricionais (ex: falta de nitrogênio, ferro, magnésio) ou estresse hídrico. Seja específico.
+   - soilAnalysis: Se o solo estiver visível, analise-o. Descreva a textura aparente (arenoso, argiloso, etc.), umidade, e procure por sinais de compactação, acúmulo de sais ou matéria orgânica. Se o solo não for visível, indique "Solo não visível na imagem".
+   - wateringFrequency: Com base na espécie, saúde e análise do solo, recomende a frequência de rega (ex: 'A cada 5-7 dias, quando o topo do solo estiver seco').
+   - sunlightNeeds: Descreva a necessidade de luz solar da planta (ex: 'Luz solar direta por pelo menos 4 horas' ou 'Luz indireta brilhante').
+   - expertTips: Forneça dicas práticas e avançadas para o cuidado específico desta espécie.
+   - treatments: Sugira tratamentos para os problemas identificados no diagnóstico detalhado. Se saudável, indique "Nenhum tratamento necessário".
+   - fullCarePlan: Elabore um plano de cuidados completo e integrado, abordando rega, luz, tipo de solo ideal, fertilização e poda.
+   - potentialPestsAndDiseases: Liste pragas e doenças comuns para esta espécie e como identificá-las precocemente.`,
 });
 
 const analyzePlantImageFlow = ai.defineFlow(

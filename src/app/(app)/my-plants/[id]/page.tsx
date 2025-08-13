@@ -28,6 +28,8 @@ import {
   Meh,
   Frown,
   BookHeart,
+  Search,
+  TestTube2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PlantJournal } from '@/components/plants/plant-journal';
@@ -209,6 +211,16 @@ function PlantDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                 <InfoPill
+                  icon={Search}
+                  title="Diagnóstico Detalhado"
+                  content={plant.detailedDiagnosis}
+                />
+                <InfoPill
+                  icon={TestTube2}
+                  title="Análise do Solo"
+                  content={plant.soilAnalysis}
+                />
                 <InfoPill
                   icon={Stethoscope}
                   title="Problemas Potenciais"

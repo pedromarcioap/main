@@ -74,10 +74,20 @@ function AddPlantPage() {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Usuário não encontrado',
+        description: 'Você precisa estar logado para adicionar uma planta.',
+      });
+      return;
+    }
     setIsLoading(true);
+
     const file = data.photo[0];
     const reader = new FileReader();
     reader.readAsDataURL(file);
+
     reader.onloadend = async () => {
       try {
         const photoDataUri = reader.result as string;
@@ -91,27 +101,28 @@ function AddPlantPage() {
           ...analysisResult,
         };
 
-        if (user) {
-          const updatedUser = { ...user, plants: [...user.plants, newPlant] };
-          if (!user.achievements.includes('first-sprout')) {
-            updatedUser.achievements.push('first-sprout');
-            toast({
-              title: 'Conquista Desbloqueada!',
-              description: 'Você ganhou "Primeiro Broto"!',
-            });
-          }
-          if (
-            updatedUser.plants.length >= 5 &&
-            !user.achievements.includes('green-thumb')
-          ) {
-            updatedUser.achievements.push('green-thumb');
-            toast({
-              title: 'Conquista Desbloqueada!',
-              description: 'Você ganhou "Dedo Verde"!',
-            });
-          }
-          await updateUser(updatedUser);
+        const currentPlants = user.plants || [];
+        const updatedUser = { ...user, plants: [...currentPlants, newPlant] };
+
+        if (!user.achievements.includes('first-sprout')) {
+          updatedUser.achievements.push('first-sprout');
+          toast({
+            title: 'Conquista Desbloqueada!',
+            description: 'Você ganhou "Primeiro Broto"!',
+          });
         }
+        if (
+          updatedUser.plants.length >= 5 &&
+          !user.achievements.includes('green-thumb')
+        ) {
+          updatedUser.achievements.push('green-thumb');
+          toast({
+            title: 'Conquista Desbloqueada!',
+            description: 'Você ganhou "Dedo Verde"!',
+          });
+        }
+
+        await updateUser(updatedUser);
 
         toast({
           title: 'Planta Adicionada!',
