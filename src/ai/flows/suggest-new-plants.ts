@@ -17,6 +17,7 @@ const SuggestNewPlantsInputSchema = z.object({
     .describe('Uma descrição da coleção de plantas existente do usuário.'),
   userPreferences: z
     .string()
+
     .describe(
       'As preferências do usuário como condições de iluminação, nível de cuidado, etc.'
     ),
