@@ -55,11 +55,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // This is the gatekeeper for the authenticated part of the app.
+    // If the authentication state is still loading, we do nothing.
+    if (loading) {
+      return;
+    }
+    // Once loading is false, if there's no user, redirect to the login page.
+    if (!user) {
       router.push('/login');
     }
   }, [user, loading, router]);
 
+  // While loading, or if there's no user yet (and the redirect hasn't happened),
+  // show a full-screen loader. This is the crucial part that prevents rendering
+  // the app's content prematurely.
   if (loading || !user) {
     return <FullScreenLoader />;
   }
@@ -74,6 +83,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const isCurrentPage = (href: string) => {
+    // Makes sure that the root /my-plants is not active when viewing /my-plants/[id]
+    if (href === '/my-plants') {
+        return pathname === href;
+    }
     if (href === '/dashboard') {
       return pathname === href;
     }

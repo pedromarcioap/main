@@ -10,18 +10,19 @@ function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  // This effect will redirect the user to the dashboard if they are already logged in.
+  // It runs only after the initial loading is complete.
   useEffect(() => {
     if (!loading && user) {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
-  
-  // Exibe a tela de carregamento apenas se o estado de `loading` for verdadeiro.
-  // Não exibe mais o loader se 'user' for verdadeiro, pois o useEffect cuidará do redirecionamento.
+
+  // While loading, we show a full-screen loader to prevent any flashes of the login form.
   if (loading) {
-     return (
+    return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
-         <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4">
           <IzyBotanicLogo className="h-24 w-24 animate-pulse" />
           <h1 className="font-headline text-2xl text-foreground/80">IzyBotanic</h1>
           <p className="text-muted-foreground">Carregando...</p>
@@ -29,9 +30,8 @@ function LoginPage() {
       </div>
     );
   }
-  
-  // Se não estiver carregando e não houver usuário, exibe o formulário de login.
-  // O caso de 'user' ser verdadeiro é tratado pelo redirecionamento no useEffect.
+
+  // If not loading and there's no user, it's safe to show the login form.
   if (!user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -40,7 +40,8 @@ function LoginPage() {
     );
   }
 
-  // Retorna um loader como fallback enquanto o redirecionamento do useEffect está acontecendo.
+  // If the user is logged in, we render a loader as a fallback while the redirection effect is running.
+  // This avoids showing the login form for a split second before redirecting.
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
