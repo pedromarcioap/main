@@ -2,7 +2,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 
 const firebaseConfig: FirebaseOptions = {
     projectId: "izybotanic",
@@ -16,5 +16,21 @@ const firebaseConfig: FirebaseOptions = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Habilitar persistência offline
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code == 'failed-precondition') {
+    // Múltiplas abas abertas, o que pode causar problemas.
+    console.warn(
+      'A persistência do Firestore falhou devido a múltiplas abas abertas. A experiência offline pode ser degradada.'
+    );
+  } else if (err.code == 'unimplemented') {
+    // O navegador não suporta a persistência do IndexedDB.
+    console.warn(
+      'Seu navegador não suporta a persistência de dados offline do Firestore. O aplicativo pode não funcionar offline.'
+    );
+  }
+});
+
 
 export { app, auth, db };
