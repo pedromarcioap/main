@@ -33,6 +33,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  const logout = useCallback(async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error('Falha ao fazer logout:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro de Logout',
+        description: 'Não foi possível sair. Por favor, tente novamente.',
+      });
+    }
+  }, [toast]);
+
   const updateUser = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
     try {
@@ -92,22 +106,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 title: 'Você está offline',
                 description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
              });
+          } finally {
+            setLoading(false);
           }
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const logout = async () => {
-    await signOut(auth);
-    setUser(null);
-  };
+  }, [toast]);
 
   const value = { user, loading, logout, updateUser };
 
