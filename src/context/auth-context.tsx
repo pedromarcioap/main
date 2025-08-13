@@ -15,6 +15,7 @@ import {
   type User as FirebaseUser,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export interface AuthContextType {
   user: User | null;
@@ -30,6 +31,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const updateUserInFirestore = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
@@ -39,20 +41,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(updatedUserData);
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
-      // Opcional: reverter o estado local em caso de falha
+      toast({
+        variant: 'destructive',
+        title: 'Erro de Sincronização',
+        description: 'Não foi possível salvar suas alterações. Verifique sua conexão.',
+      });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
-        setLoading(true);
         if (firebaseUser) {
+          const userRef = doc(db, 'users', firebaseUser.uid);
           try {
-            const userRef = doc(db, 'users', firebaseUser.uid);
             const userDoc = await getDoc(userRef);
-
             if (userDoc.exists()) {
               setUser({ id: userDoc.id, ...userDoc.data() } as User);
             } else {
@@ -70,11 +74,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(newUser);
             }
           } catch (error) {
-             console.error("Erro ao buscar dados do usuário:", error);
-             // Se falhar (ex: offline), ainda podemos ter um usuário logado
-             // mas sem dados do firestore. Podemos lidar com isso como quisermos.
-             // Por agora, vamos definir o usuário como nulo para forçar o logout ou uma nova tentativa.
-             setUser(null);
+             console.error("Erro ao buscar dados do usuário do Firestore:", error);
+             // Se o cliente estiver offline, o getDoc falhará.
+             // Em vez de travar, vamos criar um usuário local com os dados básicos do Auth.
+             // Os dados completos serão sincronizados na próxima vez que o usuário estiver online.
+             const basicUser: User = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'Usuário',
+                email: firebaseUser.email!,
+                plants: [],
+                journal: [],
+                achievements: [],
+                chatHistory: [],
+             };
+             setUser(basicUser);
+             toast({
+                variant: 'destructive',
+                title: 'Você está offline',
+                description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
+             });
           }
         } else {
           setUser(null);
@@ -84,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const logout = async () => {
     await signOut(auth);
