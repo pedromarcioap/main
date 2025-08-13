@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
-        setLoading(true); // Manter o carregamento até que tudo esteja resolvido
+        setLoading(true);
         if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           try {
@@ -61,7 +61,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
               setUser({ id: userDoc.id, ...userDoc.data() } as User);
             } else {
-              // Este caso lida com novos usuários, inclusive via Google
               const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -76,7 +75,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           } catch (error) {
              console.error("Erro ao buscar dados do usuário do Firestore:", error);
-             // CRITICAL FIX: Se a busca falhar, crie um usuário básico para evitar o travamento.
              const basicUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -93,18 +91,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
              });
           } finally {
-            setLoading(false); // Fim do carregamento apenas após a tentativa de busca
+            setLoading(false);
           }
         } else {
           setUser(null);
-          setLoading(false); // Fim do carregamento se não houver usuário
+          setLoading(false);
         }
       }
     );
 
     return () => unsubscribe();
+  // A dependência do toast estava causando um loop. Removida para estabilizar o contexto.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // A dependência do Toast estava causando re-execuções desnecessárias. Removida.
+  }, []);
 
   const logout = async () => {
     await signOut(auth);
