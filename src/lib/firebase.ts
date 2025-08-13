@@ -2,7 +2,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 
 const firebaseConfig: FirebaseOptions = {
     projectId: "izybotanic",
@@ -21,26 +21,20 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
 // Inicializa o Firestore com persistência offline
-let db: ReturnType<typeof getFirestore>;
+const db = getFirestore(app);
 
 try {
-  // Tenta inicializar com cache persistente
-  db = initializeFirestore(app, {
-    localCache: { kind: 'persistent' }
-  });
-  console.log('Firestore initialized with persistent cache.');
-} catch (error: any) {
-  // Se a inicialização persistente falhar (ex: múltiplas abas abertas),
-  // recorre ao cache em memória.
-  if (error.code === 'failed-precondition') {
-     console.warn(
-        'A persistência do Firestore falhou devido a múltiplas abas abertas. Recorrendo ao cache em memória.'
-      );
-  } else {
-    console.error("Could not initialize Firestore with persistent cache, falling back to in-memory cache.", error);
-  }
-  // Inicializa o Firestore sem persistência se a primeira tentativa falhar.
-  db = getFirestore(app);
+    enableIndexedDbPersistence(db)
+    .then(() => console.log('Persistência do Firestore ativada.'))
+    .catch((err) => {
+        if (err.code == 'failed-precondition') {
+            console.warn('A persistência do Firestore falhou, múltiplas abas abertas?');
+        } else if (err.code == 'unimplemented') {
+            console.warn('O navegador não suporta persistência do Firestore.');
+        }
+    });
+} catch (error) {
+    console.error("Erro ao inicializar a persistência do Firestore:", error)
 }
 
 

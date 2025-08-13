@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userRef = doc(db, 'users', updatedUserData.id);
       await setDoc(userRef, updatedUserData, { merge: true });
-      setUser(updatedUserData);
+      setUser(updatedUserData); // Atualiza o estado local após o sucesso
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
       // Aqui você pode querer mostrar um toast de erro para o usuário
@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
+        setLoading(true);
         if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           try {
@@ -82,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               'Erro ao buscar dados do usuário do Firestore:',
               error
             );
+             // Cria um usuário básico para evitar que a UI quebre
             const basicUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
