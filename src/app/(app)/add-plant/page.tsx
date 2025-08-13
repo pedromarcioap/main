@@ -39,17 +39,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Helper to read file as Data URL using a Promise
-const toDataURL = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-};
-
-
 function AddPlantPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -97,8 +86,17 @@ function AddPlantPage() {
     setIsLoading(true);
 
     try {
-      const file = data.photo[0];
-      const photoDataUri = await toDataURL(file);
+      const file: File = data.photo[0];
+      
+      // Read the file into an ArrayBuffer.
+      const arrayBuffer = await file.arrayBuffer();
+
+      // Convert the ArrayBuffer to a Base64 string.
+      const base64String = Buffer.from(arrayBuffer).toString('base64');
+      
+      // Construct the Data URI.
+      const photoDataUri = `data:${file.type};base64,${base64String}`;
+
       const analysisResult = await analyzePlantImage({ photoDataUri });
 
       const newPlant: Plant = {
