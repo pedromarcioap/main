@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
+        setLoading(true); // Manter o carregamento até que tudo esteja resolvido
         if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           try {
@@ -75,9 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           } catch (error) {
              console.error("Erro ao buscar dados do usuário do Firestore:", error);
-             // Se o cliente estiver offline, o getDoc falhará.
-             // Em vez de travar, vamos criar um usuário local com os dados básicos do Auth.
-             // Os dados completos serão sincronizados na próxima vez que o usuário estiver online.
+             // CRITICAL FIX: Se a busca falhar, crie um usuário básico para evitar o travamento.
              const basicUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -93,16 +92,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 title: 'Você está offline',
                 description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
              });
+          } finally {
+            setLoading(false); // Fim do carregamento apenas após a tentativa de busca
           }
         } else {
           setUser(null);
+          setLoading(false); // Fim do carregamento se não houver usuário
         }
-        setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // A dependência do Toast estava causando re-execuções desnecessárias. Removida.
 
   const logout = async () => {
     await signOut(auth);
