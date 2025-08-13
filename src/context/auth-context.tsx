@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const updateUserInFirestore = useCallback(async (updatedUserData: User) => {
+  const updateUser = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
     try {
       const userRef = doc(db, 'users', updatedUserData.id);
@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
               setUser({ id: userDoc.id, ...userDoc.data() } as User);
             } else {
+              // This handles the case for a new user, especially after a social login
               const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -75,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           } catch (error) {
              console.error("Erro ao buscar dados do usuário do Firestore:", error);
+             // Create a basic user object to keep the app functional
              const basicUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -90,18 +92,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 title: 'Você está offline',
                 description: 'Não foi possível carregar todos os seus dados. Algumas funcionalidades podem estar limitadas.',
              });
-          } finally {
-            setLoading(false);
           }
         } else {
           setUser(null);
-          setLoading(false);
         }
+        setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  // A dependência do toast estava causando um loop. Removida para estabilizar o contexto.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -110,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
-  const value = { user, loading, logout, updateUser: updateUserInFirestore };
+  const value = { user, loading, logout, updateUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
