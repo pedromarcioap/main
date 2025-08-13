@@ -39,6 +39,17 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Helper to read file as Data URL using a Promise
+const toDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
+
+
 function AddPlantPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -82,73 +93,62 @@ function AddPlantPage() {
       });
       return;
     }
+
     setIsLoading(true);
 
-    const file = data.photo[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
+    try {
+      const file = data.photo[0];
+      const photoDataUri = await toDataURL(file);
+      const analysisResult = await analyzePlantImage({ photoDataUri });
 
-    reader.onloadend = async () => {
-      try {
-        const photoDataUri = reader.result as string;
-        const analysisResult = await analyzePlantImage({ photoDataUri });
+      const newPlant: Plant = {
+        id: crypto.randomUUID(),
+        nickname: data.nickname,
+        photoDataUri,
+        addedDate: new Date().toISOString(),
+        ...analysisResult,
+      };
 
-        const newPlant: Plant = {
-          id: crypto.randomUUID(),
-          nickname: data.nickname,
-          photoDataUri,
-          addedDate: new Date().toISOString(),
-          ...analysisResult,
-        };
+      const currentPlants = user.plants || [];
+      const updatedUser = { ...user, plants: [...currentPlants, newPlant] };
 
-        const currentPlants = user.plants || [];
-        const updatedUser = { ...user, plants: [...currentPlants, newPlant] };
-
-        if (!user.achievements.includes('first-sprout')) {
-          updatedUser.achievements.push('first-sprout');
-          toast({
-            title: 'Conquista Desbloqueada!',
-            description: 'Você ganhou "Primeiro Broto"!',
-          });
-        }
-        if (
-          updatedUser.plants.length >= 5 &&
-          !user.achievements.includes('green-thumb')
-        ) {
-          updatedUser.achievements.push('green-thumb');
-          toast({
-            title: 'Conquista Desbloqueada!',
-            description: 'Você ganhou "Dedo Verde"!',
-          });
-        }
-
-        await updateUser(updatedUser);
-
+      if (!user.achievements.includes('first-sprout')) {
+        updatedUser.achievements.push('first-sprout');
         toast({
-          title: 'Planta Adicionada!',
-          description: `${data.nickname} juntou-se ao seu jardim.`,
+          title: 'Conquista Desbloqueada!',
+          description: 'Você ganhou "Primeiro Broto"!',
         });
-        router.push(`/my-plants/${newPlant.id}`);
-      } catch (error) {
-        console.error('Erro ao analisar a imagem da planta:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Análise Falhou',
-          description:
-            'Não foi possível analisar a imagem da planta. Por favor, tente novamente.',
-        });
-      } finally {
-        setIsLoading(false);
       }
-    };
-    reader.onerror = () => {
+      if (
+        updatedUser.plants.length >= 5 &&
+        !user.achievements.includes('green-thumb')
+      ) {
+        updatedUser.achievements.push('green-thumb');
+        toast({
+          title: 'Conquista Desbloqueada!',
+          description: 'Você ganhou "Dedo Verde"!',
+        });
+      }
+
+      await updateUser(updatedUser);
+
+      toast({
+        title: 'Planta Adicionada!',
+        description: `${data.nickname} juntou-se ao seu jardim.`,
+      });
+      router.push(`/my-plants/${newPlant.id}`);
+
+    } catch (error) {
+      console.error('Erro ao adicionar planta:', error);
       toast({
         variant: 'destructive',
-        title: 'Erro',
-        description: 'Falha ao ler o arquivo.',
+        title: 'Análise Falhou',
+        description:
+          'Não foi possível analisar ou salvar sua planta. Por favor, tente novamente.',
       });
+    } finally {
       setIsLoading(false);
-    };
+    }
   };
 
   return (
