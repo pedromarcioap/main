@@ -47,25 +47,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
+        setLoading(true);
         if (firebaseUser) {
-          const userRef = doc(db, 'users', firebaseUser.uid);
-          const userDoc = await getDoc(userRef);
+          try {
+            const userRef = doc(db, 'users', firebaseUser.uid);
+            const userDoc = await getDoc(userRef);
 
-          if (userDoc.exists()) {
-            setUser({ id: userDoc.id, ...userDoc.data() } as User);
-          } else {
-            // Este caso lida com novos usuários, inclusive via Google
-            const newUser: User = {
-              id: firebaseUser.uid,
-              name: firebaseUser.displayName || 'Usuário',
-              email: firebaseUser.email!,
-              plants: [],
-              journal: [],
-              achievements: [],
-              chatHistory: [],
-            };
-            await setDoc(userRef, newUser);
-            setUser(newUser);
+            if (userDoc.exists()) {
+              setUser({ id: userDoc.id, ...userDoc.data() } as User);
+            } else {
+              // Este caso lida com novos usuários, inclusive via Google
+              const newUser: User = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'Usuário',
+                email: firebaseUser.email!,
+                plants: [],
+                journal: [],
+                achievements: [],
+                chatHistory: [],
+              };
+              await setDoc(userRef, newUser);
+              setUser(newUser);
+            }
+          } catch (error) {
+             console.error("Erro ao buscar dados do usuário:", error);
+             // Se falhar (ex: offline), ainda podemos ter um usuário logado
+             // mas sem dados do firestore. Podemos lidar com isso como quisermos.
+             // Por agora, vamos definir o usuário como nulo para forçar o logout ou uma nova tentativa.
+             setUser(null);
           }
         } else {
           setUser(null);
