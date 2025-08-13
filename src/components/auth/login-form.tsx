@@ -119,6 +119,7 @@ export function LoginForm() {
                     <Input
                       className="border-border bg-muted/50"
                       placeholder="nome@exemplo.com"
+                      autoComplete="email"
                       {...field}
                       disabled={isLoading || isGoogleLoading}
                     />
@@ -140,6 +141,7 @@ export function LoginForm() {
                       type="password"
                       className="border-border bg-muted/50"
                       placeholder="••••••••"
+                      autoComplete="current-password"
                       {...field}
                       disabled={isLoading || isGoogleLoading}
                     />
