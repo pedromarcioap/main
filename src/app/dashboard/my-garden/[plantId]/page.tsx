@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import type { Plant } from '@/types';
 import {
   Card,
   CardContent,
@@ -45,6 +44,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export default function PlantDetailPage() {
   const { user, updateUser } = useAuth();
@@ -54,6 +54,14 @@ export default function PlantDetailPage() {
   const plantId = params.plantId as string;
 
   const plant = user?.plants.find((p) => p.id === plantId);
+
+  useEffect(() => {
+    // If the user data has loaded and the plant is no longer found
+    // (e.g., after deletion), redirect to the main garden page.
+    if (user && !plant) {
+      router.replace('/dashboard/my-garden');
+    }
+  }, [user, plant, router]);
 
   const handleDeletePlant = async () => {
     if (!user || !plant) return;
@@ -67,7 +75,7 @@ export default function PlantDetailPage() {
         title: 'Planta Excluída!',
         description: `${plant.nickname} foi removida do seu jardim.`,
       });
-      router.push('/dashboard/my-garden');
+      // The useEffect hook will handle the redirection automatically
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -78,18 +86,15 @@ export default function PlantDetailPage() {
   };
 
   if (!plant) {
+    // This state will be temporary before the useEffect redirects.
+    // It also handles cases where the plantId is invalid from the start.
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
         <Leaf className="w-16 h-16 text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold">Planta não encontrada</h1>
         <p className="text-muted-foreground">
-          A planta que você está procurando não existe no seu jardim.
+          Redirecionando para o seu jardim...
         </p>
-        <Link href="/dashboard/my-garden" passHref>
-          <Button variant="outline" className="mt-4">
-            Voltar para o Meu Jardim
-          </Button>
-        </Link>
       </div>
     );
   }
