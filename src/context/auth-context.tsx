@@ -133,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(userCredential.user, { displayName: name });
+      // The onAuthStateChanged listener will handle creating the user document in Firestore
     } catch (error) {
       throw new Error(mapFirebaseError(error as AuthError));
     }
@@ -156,10 +157,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const logout = useCallback(async () => {
+    setLoading(true);
     try {
       await signOut(auth);
+      setUser(null);
     } catch (error) {
       console.error('Falha ao fazer logout:', error);
+    } finally {
+        setLoading(false);
     }
   }, []);
 
