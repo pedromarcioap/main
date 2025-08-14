@@ -49,7 +49,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(updatedUserData); // Atualiza o estado local após o sucesso
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
-      // Aqui você pode querer mostrar um toast de erro para o usuário
     }
   }, []);
 
@@ -57,7 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(
       auth,
       async (firebaseUser: FirebaseUser | null) => {
-        setLoading(true);
         if (firebaseUser) {
           const userRef = doc(db, 'users', firebaseUser.uid);
           try {
