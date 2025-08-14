@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Loader2, Upload } from 'lucide-react';
+import { Camera, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 const formSchema = z.object({
@@ -36,6 +36,16 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const fileToDataUri = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 
 export default function AddPlantPage() {
   const { user, updateUser } = useAuth();
@@ -72,55 +82,55 @@ export default function AddPlantPage() {
       });
       return;
     }
+    
     setIsSubmitting(true);
+
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(photoFile);
-      reader.onloadend = async () => {
-        const base64Photo = reader.result as string;
-        
-        const analysisResult = await analyzePlantImage({ photoDataUri: base64Photo });
+      const base64Photo = await fileToDataUri(photoFile);
+      const analysisResult = await analyzePlantImage({ photoDataUri: base64Photo });
 
-        const newPlant: Plant = {
-          id: crypto.randomUUID(),
-          nickname: data.nickname,
-          photoDataUri: base64Photo,
-          addedDate: new Date().toISOString(),
-          ...analysisResult
-        };
-
-        const updatedUser = {
-          ...user,
-          plants: [...user.plants, newPlant],
-        };
-
-        // Check for 'first-sprout' achievement
-        if (!user.achievements.includes('first-sprout')) {
-          updatedUser.achievements.push('first-sprout');
-          toast({
-            title: 'Nova Conquista!',
-            description: 'Primeiro Broto: Você adicionou sua primeira planta!',
-          });
-        }
-
-        // Check for 'green-thumb' achievement
-        if (updatedUser.plants.length >= 5 && !user.achievements.includes('green-thumb')) {
-          updatedUser.achievements.push('green-thumb');
-          toast({
-            title: 'Nova Conquista!',
-            description: 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
-          });
-        }
-
-        await updateUser(updatedUser);
-
-        toast({
-          title: 'Planta Adicionada!',
-          description: `${data.nickname} agora faz parte do seu jardim.`,
-        });
-
-        router.push(`/dashboard/my-garden/${newPlant.id}`);
+      const newPlant: Plant = {
+        id: crypto.randomUUID(),
+        nickname: data.nickname,
+        photoDataUri: base64Photo,
+        addedDate: new Date().toISOString(),
+        ...analysisResult,
       };
+
+      const updatedUser = {
+        ...user,
+        plants: [...user.plants, newPlant],
+      };
+
+      // Check for 'first-sprout' achievement
+      if (!user.achievements.includes('first-sprout')) {
+        updatedUser.achievements.push('first-sprout');
+        toast({
+          title: 'Nova Conquista!',
+          description: 'Primeiro Broto: Você adicionou sua primeira planta!',
+        });
+      }
+
+      // Check for 'green-thumb' achievement
+      if (
+        updatedUser.plants.length >= 5 &&
+        !user.achievements.includes('green-thumb')
+      ) {
+        updatedUser.achievements.push('green-thumb');
+        toast({
+          title: 'Nova Conquista!',
+          description: 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
+        });
+      }
+
+      await updateUser(updatedUser);
+
+      toast({
+        title: 'Planta Adicionada!',
+        description: `${data.nickname} agora faz parte do seu jardim.`,
+      });
+
+      router.push(`/dashboard/my-garden/${newPlant.id}`);
     } catch (error) {
       console.error('Erro ao adicionar planta:', error);
       toast({
@@ -133,6 +143,7 @@ export default function AddPlantPage() {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="flex justify-center items-start py-8">
@@ -187,8 +198,8 @@ export default function AddPlantPage() {
                           <Image
                             src={photoPreview}
                             alt="Prévia da planta"
-                            layout="fill"
-                            objectFit="cover"
+                            fill={true}
+                            style={{objectFit: 'cover'}}
                             className="rounded-lg"
                           />
                         ) : (
