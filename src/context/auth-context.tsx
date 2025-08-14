@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         'Erro ao buscar dados do usuário do Firestore:',
         error
       );
+      // Fallback to basic user data if Firestore fails
       const basicUser: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || 'Usuário',
@@ -103,6 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Falha ao fazer logout:', error);
     } finally {
       setUser(null);
+      setLoading(true); // Reset loading state for next login
     }
   }, []);
 
