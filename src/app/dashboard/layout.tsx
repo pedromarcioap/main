@@ -97,7 +97,6 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             ))}
           </SidebarMenu>
           <SidebarGroup className="mt-auto">
-            <SidebarGroupLabel>Conta</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleLogout} variant="ghost">
