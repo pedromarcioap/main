@@ -2,11 +2,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { 
-  getFirestore, 
-  initializeFirestore, 
-  persistentLocalCache
-} from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig: FirebaseOptions = {
     apiKey: "AIzaSyBZlz6yRqt4rLUTmiFKWOrMjo1PDpMbBG8",
@@ -20,23 +16,8 @@ const firebaseConfig: FirebaseOptions = {
 
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-let db;
-
-if (typeof window !== 'undefined') {
-  try {
-    db = initializeFirestore(app, {
-      localCache: persistentLocalCache({})
-    });
-    console.log('Firestore initialized with persistent cache.');
-  } catch (error) {
-    console.error("Error initializing persistent cache, falling back to in-memory.", error);
-    db = getFirestore(app);
-  }
-} else {
-  db = getFirestore(app);
-}
-
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 export { app, auth, db };
