@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = useCallback(async (firebaseUser: FirebaseUser): Promise<User> => {
+  const getOrCreateUser = useCallback(async (firebaseUser: FirebaseUser): Promise<User> => {
     const userRef = doc(db, 'users', firebaseUser.uid);
     const userDoc = await getDoc(userRef);
 
@@ -87,30 +87,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const authStateChanged = useCallback(
-    async (firebaseUser: FirebaseUser | null) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
         try {
-          const userData = await fetchUser(firebaseUser);
+          const userData = await getOrCreateUser(firebaseUser);
           setUser(userData);
         } catch (error) {
           console.error('Failed to fetch user data, logging out.', error);
-          await signOut(auth); // Log out on failure to fetch data
+          await signOut(auth);
           setUser(null);
         }
       } else {
         setUser(null);
       }
       setLoading(false);
-    },
-    [fetchUser]
-  );
+    });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, authStateChanged);
     return () => unsubscribe();
-  }, [authStateChanged]);
+  }, [getOrCreateUser]);
 
   const loginWithEmail = async (email: string, pass: string) => {
     try {
@@ -148,24 +144,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userRef = doc(db, 'users', updatedUserData.id);
       await setDoc(userRef, updatedUserData, { merge: true });
-      setUser(updatedUserData); // Optimistic update
+      setUser(updatedUserData);
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
-      // Optional: Re-fetch or show error
       throw new Error('Não foi possível salvar suas alterações.');
     }
   }, []);
 
   const logout = useCallback(async () => {
-    setLoading(true);
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (error) {
-      console.error('Falha ao fazer logout:', error);
-    } finally {
-      setLoading(false);
-    }
+    await signOut(auth);
+    setUser(null);
+    setLoading(false);
   }, []);
 
   const value = {
