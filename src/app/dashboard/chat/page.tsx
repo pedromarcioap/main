@@ -64,22 +64,41 @@ export default function ChatPage() {
 
       const updatedMessages = [...newMessages, botMessage];
       setMessages(updatedMessages);
+      
+      const updatedUser = {
+        ...user,
+        chatHistory: updatedMessages,
+      };
+      
+      const newAchievements: string[] = [];
 
       // Check for 'chatty-gardener' achievement
       if (!user.achievements.includes('chatty-gardener')) {
-        const updatedUser = {
-          ...user,
-          chatHistory: updatedMessages,
-          achievements: [...user.achievements, 'chatty-gardener']
-        }
-        await updateUser(updatedUser);
-        toast({
-          title: 'Nova Conquista!',
-          description: 'Jardineiro Tagarela: Você teve sua primeira conversa com Izy!',
-        });
-      } else {
-        await updateUser({ ...user, chatHistory: updatedMessages });
+        newAchievements.push('chatty-gardener');
       }
+
+      // Check for 'botanical-sage' achievement
+      const userMessagesCount = updatedMessages.filter(m => m.role === 'user').length;
+      if (userMessagesCount >= 5 && !user.achievements.includes('botanical-sage')) {
+          newAchievements.push('botanical-sage');
+      }
+
+      if (newAchievements.length > 0) {
+        updatedUser.achievements.push(...newAchievements);
+        const achievementMessages: {[key: string]: string} = {
+            'chatty-gardener': 'Jardineiro Tagarela: Você teve sua primeira conversa com Izy!',
+            'botanical-sage': 'Sábio Botânico: Você fez 5 perguntas para Izy!'
+        }
+        
+        newAchievements.forEach(id => {
+            toast({
+              title: 'Nova Conquista!',
+              description: achievementMessages[id],
+            });
+        })
+      }
+
+      await updateUser(updatedUser);
 
     } catch (error) {
       console.error('Erro ao conversar com o especialista:', error);

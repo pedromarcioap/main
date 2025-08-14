@@ -101,14 +101,12 @@ export default function AddPlantPage() {
         ...user,
         plants: [...user.plants, newPlant],
       };
+      
+      const newAchievements: string[] = [];
 
       // Check for 'first-sprout' achievement
       if (!user.achievements.includes('first-sprout')) {
-        updatedUser.achievements.push('first-sprout');
-        toast({
-          title: 'Nova Conquista!',
-          description: 'Primeiro Broto: Você adicionou sua primeira planta!',
-        });
+        newAchievements.push('first-sprout');
       }
 
       // Check for 'green-thumb' achievement
@@ -116,12 +114,42 @@ export default function AddPlantPage() {
         updatedUser.plants.length >= 5 &&
         !user.achievements.includes('green-thumb')
       ) {
-        updatedUser.achievements.push('green-thumb');
-        toast({
-          title: 'Nova Conquista!',
-          description: 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
-        });
+        newAchievements.push('green-thumb');
       }
+      
+      // Check for 'enthusiast-collector' achievement
+      if (
+        updatedUser.plants.length >= 10 &&
+        !user.achievements.includes('enthusiast-collector')
+      ) {
+        newAchievements.push('enthusiast-collector');
+      }
+      
+      // Check for 'master-botanist' achievement
+      if (
+        updatedUser.plants.length >= 25 &&
+        !user.achievements.includes('master-botanist')
+      ) {
+        newAchievements.push('master-botanist');
+      }
+
+      if (newAchievements.length > 0) {
+        updatedUser.achievements.push(...newAchievements);
+        const achievementMessages: {[key: string]: string} = {
+            'first-sprout': 'Primeiro Broto: Você adicionou sua primeira planta!',
+            'green-thumb': 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
+            'enthusiast-collector': 'Colecionador Entusiasta: Você tem 10 plantas!',
+            'master-botanist': 'Mestre Botânico: Sua coleção chegou a 25 plantas!'
+        }
+        
+        newAchievements.forEach(id => {
+            toast({
+              title: 'Nova Conquista!',
+              description: achievementMessages[id],
+            });
+        })
+      }
+
 
       await updateUser(updatedUser);
 

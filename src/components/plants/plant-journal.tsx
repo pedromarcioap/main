@@ -83,6 +83,16 @@ export function PlantJournal({ plantId }: PlantJournalProps) {
 
     try {
       const updatedUser = { ...user, journal: [...user.journal, newEntry] };
+      
+      // Check for 'journal-curator' achievement
+      if (updatedUser.journal.length >= 10 && !user.achievements.includes('journal-curator')) {
+        updatedUser.achievements.push('journal-curator');
+        toast({
+          title: 'Nova Conquista!',
+          description: 'Curador de Diários: Você fez 10 anotações no diário!',
+        });
+      }
+
       await updateUser(updatedUser);
       toast({
         title: 'Entrada Adicionada!',

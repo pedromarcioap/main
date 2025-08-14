@@ -62,6 +62,24 @@ export default function PlantDetailPage() {
       router.replace('/dashboard/my-garden');
     }
   }, [user, plant, router]);
+  
+  const unlockAchievement = async (achievementId: string, title: string, description: string) => {
+    if (!user || user.achievements.includes(achievementId)) return;
+    
+    try {
+      const updatedUser = {
+        ...user,
+        achievements: [...user.achievements, achievementId],
+      };
+      await updateUser(updatedUser);
+      toast({
+        title: title,
+        description: description,
+      });
+    } catch (error) {
+      console.error('Failed to unlock achievement:', error);
+    }
+  }
 
   const handleDeletePlant = async () => {
     if (!user || !plant) return;
@@ -198,7 +216,13 @@ export default function PlantDetailPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>
+                <AccordionTrigger
+                  onClick={() => unlockAchievement(
+                    'diligent-student', 
+                    'Nova Conquista!',
+                    'Estudante Diligente: Você viu o plano de cuidados completo de uma de suas plantas.'
+                    )}
+                >
                   <BookOpenCheck className="w-5 h-5 mr-2" />
                   Plano de Cuidados Completo
                 </AccordionTrigger>
