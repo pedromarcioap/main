@@ -51,12 +51,11 @@ const mapFirebaseError = (error: AuthError): string => {
     case 'auth/weak-password':
       return 'A senha é muito fraca. Tente uma mais forte.';
     case 'auth/popup-closed-by-user':
-        return 'O processo de login com o Google foi cancelado.';
+      return 'O processo de login com o Google foi cancelado.';
     default:
       return 'Ocorreu um erro inesperado. Por favor, tente novamente.';
   }
 };
-
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -94,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userData = await fetchUser(firebaseUser);
           setUser(userData);
         } catch (error) {
-          console.error("Failed to fetch user data, logging out.", error);
+          console.error('Failed to fetch user data, logging out.', error);
           await signOut(auth); // Log out on failure to fetch data
           setUser(null);
         }
@@ -105,12 +104,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
     [fetchUser]
   );
-  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, authStateChanged);
     return () => unsubscribe();
   }, [authStateChanged]);
-
 
   const loginWithEmail = async (email: string, pass: string) => {
     try {
@@ -131,7 +129,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signupWithEmail = async (name: string, email: string, pass: string) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        pass
+      );
       await updateProfile(userCredential.user, { displayName: name });
       // The onAuthStateChanged listener will handle creating the user document in Firestore
     } catch (error) {
@@ -139,22 +141,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-
-  const updateUser = useCallback(
-    async (updatedUserData: User) => {
-      if (!updatedUserData?.id) return;
-      try {
-        const userRef = doc(db, 'users', updatedUserData.id);
-        await setDoc(userRef, updatedUserData, { merge: true });
-        setUser(updatedUserData); // Optimistic update
-      } catch (error) {
-        console.error('Falha ao atualizar o usuário:', error);
-        // Optional: Re-fetch or show error
-        throw new Error("Não foi possível salvar suas alterações.");
-      }
-    },
-    []
-  );
+  const updateUser = useCallback(async (updatedUserData: User) => {
+    if (!updatedUserData?.id) return;
+    try {
+      const userRef = doc(db, 'users', updatedUserData.id);
+      await setDoc(userRef, updatedUserData, { merge: true });
+      setUser(updatedUserData); // Optimistic update
+    } catch (error) {
+      console.error('Falha ao atualizar o usuário:', error);
+      // Optional: Re-fetch or show error
+      throw new Error('Não foi possível salvar suas alterações.');
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     setLoading(true);
@@ -164,10 +162,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Falha ao fazer logout:', error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   }, []);
-
 
   const value = {
     user,
