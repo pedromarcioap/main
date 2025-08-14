@@ -122,38 +122,39 @@ export default function ProfilePage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-               <div className="flex flex-col items-center gap-4">
-                    <FormField
-                      control={form.control}
-                      name="photoURL"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Foto de Perfil</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                               <input 
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                               />
-                               <Avatar 
-                                 className="h-24 w-24 cursor-pointer"
-                                 onClick={() => fileInputRef.current?.click()}
-                               >
-                                 <AvatarImage src={photoPreview || user?.photoURL} alt={user?.name} />
-                                 <AvatarFallback>
-                                     <UserIcon className="h-12 w-12" />
-                                 </AvatarFallback>
-                               </Avatar>
-                            </div>
-                          </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-               </div>
+              <FormField
+                control={form.control}
+                name="photoURL"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col items-center">
+                    <FormLabel>Foto de Perfil</FormLabel>
+                    <FormControl className="mt-0">
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                        />
+                        <Avatar
+                          className="h-24 w-24 cursor-pointer"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <AvatarImage
+                            src={photoPreview || user?.photoURL}
+                            alt={user?.name}
+                          />
+                          <AvatarFallback>
+                            <UserIcon className="h-12 w-12" />
+                          </AvatarFallback>
+                        </Avatar>
+                      </>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
