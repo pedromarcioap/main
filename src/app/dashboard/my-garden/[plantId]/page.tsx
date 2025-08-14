@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import type { Plant } from '@/types';
 import {
@@ -17,6 +17,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlantJournal } from '@/components/plants/plant-journal';
@@ -28,21 +39,43 @@ import {
   Leaf,
   Sparkles,
   Sun,
-  Thermometer,
-  Wind,
-  Wrench,
-  Bug,
+  Trash2,
   BrainCircuit,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PlantDetailPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
   const plantId = params.plantId as string;
 
   const plant = user?.plants.find((p) => p.id === plantId);
+
+  const handleDeletePlant = async () => {
+    if (!user || !plant) return;
+
+    const updatedPlants = user.plants.filter((p) => p.id !== plantId);
+    const updatedJournal = user.journal.filter((j) => j.plantId !== plantId);
+
+    try {
+      await updateUser({ ...user, plants: updatedPlants, journal: updatedJournal });
+      toast({
+        title: 'Planta Excluída!',
+        description: `${plant.nickname} foi removida do seu jardim.`,
+      });
+      router.push('/dashboard/my-garden');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Não foi possível excluir a planta. Tente novamente.',
+      });
+    }
+  };
 
   if (!plant) {
     return (
@@ -90,12 +123,37 @@ export default function PlantDetailPage() {
                 />
               </div>
               <div className="flex-1">
-                <h1 className="text-4xl font-bold font-headline">
-                  {plant.nickname}
-                </h1>
-                <p className="text-xl text-muted-foreground italic">
-                  {plant.species}
-                </p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h1 className="text-4xl font-bold font-headline">
+                      {plant.nickname}
+                    </h1>
+                    <p className="text-xl text-muted-foreground italic">
+                      {plant.species}
+                    </p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação não pode ser desfeita. Isso excluirá permanentemente a planta e todas as suas anotações do diário.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeletePlant} className="bg-destructive hover:bg-destructive/90">
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
                 <div className="mt-4 flex items-center gap-2">
                   <HeartPulse className="w-5 h-5" />
                   <span className="font-semibold">Saúde:</span>
@@ -155,7 +213,7 @@ export default function PlantDetailPage() {
                     </div>
                   </div>
                    <div className="flex items-start gap-3">
-                    <Wrench className="w-6 h-6 text-gray-500 mt-1" />
+                    <Leaf className="w-6 h-6 text-gray-500 mt-1" />
                     <div>
                       <h4 className="font-semibold">Tratamentos</h4>
                       <p className="text-muted-foreground">{plant.treatments}</p>

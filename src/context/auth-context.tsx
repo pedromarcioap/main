@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(updatedUserData); // Atualiza o estado local após o sucesso
     } catch (error) {
       console.error('Falha ao atualizar o usuário:', error);
+      throw error; // Propagate error for handling in components
     }
   }, []);
 
@@ -68,6 +69,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
                 email: firebaseUser.email!,
+                nickname: '',
+                phone: '',
+                photoURL: firebaseUser.photoURL || '',
                 plants: [],
                 journal: [],
                 achievements: [],
@@ -86,6 +90,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || 'Usuário',
               email: firebaseUser.email!,
+              nickname: '',
+              phone: '',
+              photoURL: firebaseUser.photoURL || '',
               plants: [],
               journal: [],
               achievements: [],

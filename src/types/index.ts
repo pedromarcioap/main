@@ -4,6 +4,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  nickname: string;
+  phone: string;
+  photoURL: string;
   plants: Plant[];
   journal: JournalEntry[];
   achievements: string[];

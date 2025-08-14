@@ -25,8 +25,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Calendar, NotebookPen } from 'lucide-react';
+import { Calendar, NotebookPen, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -90,6 +101,26 @@ export function PlantJournal({ plantId }: PlantJournalProps) {
     }
   };
 
+  const handleDeleteEntry = async (entryId: string) => {
+    if (!user) return;
+
+    const updatedJournal = user.journal.filter((entry) => entry.id !== entryId);
+
+    try {
+      await updateUser({ ...user, journal: updatedJournal });
+      toast({
+        title: 'Anotação Excluída!',
+        description: 'Sua anotação foi removida do diário.',
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Não foi possível excluir a anotação. Tente novamente.',
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -135,7 +166,7 @@ export function PlantJournal({ plantId }: PlantJournalProps) {
           <ScrollArea className="h-72 pr-4">
             <div className="space-y-4">
               {journalEntries.map((entry) => (
-                <div key={entry.id} className="rounded-lg bg-muted/50 p-4">
+                <div key={entry.id} className="group relative rounded-lg bg-muted/50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>
@@ -147,6 +178,31 @@ export function PlantJournal({ plantId }: PlantJournalProps) {
                     </span>
                   </div>
                   <p className="text-foreground">{entry.notes}</p>
+                   <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                       <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta ação não pode ser desfeita. Isso excluirá permanentemente esta anotação.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteEntry(entry.id)} className="bg-destructive hover:bg-destructive/90">
+                          Excluir
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               ))}
             </div>

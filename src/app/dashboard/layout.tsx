@@ -22,6 +22,7 @@ import {
   Home,
   Bot,
   BookHeart,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -67,6 +68,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
     { href: '/dashboard/add-plant', label: 'Adicionar Planta', icon: PlusCircle },
     { href: '/dashboard/chat', label: 'Fale com a Izy', icon: Bot },
     { href: '/dashboard/achievements', label: 'Conquistas', icon: BookHeart },
+    { href: '/dashboard/profile', label: 'Meu Perfil', icon: User },
   ];
 
   return (
