@@ -23,14 +23,11 @@ const auth = getAuth(app);
 let db;
 try {
    db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: {
-        forceOwnership: true,
-      }
-    }),
+    localCache: persistentLocalCache({}),
   });
+  console.log('Firestore initialized with persistent cache.');
 } catch(e) {
-  console.error(e);
+  console.error("Failed to initialize persistent cache, falling back to memory cache.", e);
   db = initializeFirestore(app, {
     localCache: memoryLocalCache({})
   })
