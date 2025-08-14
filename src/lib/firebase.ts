@@ -5,36 +5,38 @@ import { getAuth } from 'firebase/auth';
 import { 
   getFirestore, 
   initializeFirestore, 
-  persistentLocalCache,
-  memoryLocalCache,
-  enableIndexedDbPersistence
+  persistentLocalCache
 } from 'firebase/firestore';
 
 const firebaseConfig: FirebaseOptions = {
     apiKey: "AIzaSyBZlz6yRqt4rLUTmiFKWOrMjo1PDpMbBG8",
     authDomain: "izybotanic.firebaseapp.com",
     projectId: "izybotanic",
-    storageBucket: "izybotanic.appspot.com",
+    storageBucket: "izybotanic.firebasestorage.app",
     messagingSenderId: "648909338628",
-    appId: "1:648909-ZBQTLG0ERH"
+    appId: "1:648909338628:web:e5000b690e4b3d37675d51",
+    measurementId: "G-ZBQTLG0ERH"
 };
 
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
+let db;
 
-// Initialize Firestore with offline persistence
-try {
-  enableIndexedDbPersistence(db)
-    .then(() => console.log('Persistência offline ativada.'))
-    .catch((err) => {
-        console.warn('Erro ao ativar persistência offline:', err.code);
+if (typeof window !== 'undefined') {
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({})
     });
-} catch (error) {
-    console.error("Erro ao inicializar persistência do Firestore", error)
+    console.log('Firestore initialized with persistent cache.');
+  } catch (error) {
+    console.error("Error initializing persistent cache, falling back to in-memory.", error);
+    db = getFirestore(app);
+  }
+} else {
+  db = getFirestore(app);
 }
 
+const auth = getAuth(app);
 
 export { app, auth, db };

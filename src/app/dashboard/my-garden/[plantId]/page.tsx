@@ -1,0 +1,192 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import type { Plant } from '@/types';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { PlantJournal } from '@/components/plants/plant-journal';
+import {
+  AlertCircle,
+  BookOpenCheck,
+  Droplets,
+  HeartPulse,
+  Leaf,
+  Sparkles,
+  Sun,
+  Thermometer,
+  Wind,
+  Wrench,
+  Bug,
+  BrainCircuit,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export default function PlantDetailPage() {
+  const { user } = useAuth();
+  const params = useParams();
+  const plantId = params.plantId as string;
+
+  const plant = user?.plants.find((p) => p.id === plantId);
+
+  if (!plant) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center">
+        <Leaf className="w-16 h-16 text-muted-foreground mb-4" />
+        <h1 className="text-2xl font-bold">Planta não encontrada</h1>
+        <p className="text-muted-foreground">
+          A planta que você está procurando não existe no seu jardim.
+        </p>
+        <Link href="/dashboard/my-garden" passHref>
+          <Button variant="outline" className="mt-4">
+            Voltar para o Meu Jardim
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const getHealthBadgeVariant = (health: string) => {
+    switch (health) {
+      case 'Saudável':
+        return 'default';
+      case 'Problemas menores':
+        return 'secondary';
+      case 'Não saudável':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2 space-y-8">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-1/3">
+                <Image
+                  src={plant.photoDataUri}
+                  alt={plant.nickname}
+                  width={400}
+                  height={400}
+                  className="rounded-lg object-cover aspect-square"
+                />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold font-headline">
+                  {plant.nickname}
+                </h1>
+                <p className="text-xl text-muted-foreground italic">
+                  {plant.species}
+                </p>
+                <div className="mt-4 flex items-center gap-2">
+                  <HeartPulse className="w-5 h-5" />
+                  <span className="font-semibold">Saúde:</span>
+                  <Badge variant={getHealthBadgeVariant(plant.health)}>
+                    {plant.health}
+                  </Badge>
+                </div>
+                <div className="mt-2">
+                  <p className="text-sm">
+                    Adicionada em:{' '}
+                    {new Date(plant.addedDate).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible defaultValue="item-1">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>
+                  <BrainCircuit className="w-5 h-5 mr-2" />
+                  Diagnóstico da Izy
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-md">Problemas Potenciais</h4>
+                    <p className="text-muted-foreground">{plant.potentialProblems}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-md">Diagnóstico Detalhado</h4>
+                    <p className="text-muted-foreground">{plant.detailedDiagnosis}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-md">Análise do Solo</h4>
+                    <p className="text-muted-foreground">{plant.soilAnalysis}</p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>
+                  <BookOpenCheck className="w-5 h-5 mr-2" />
+                  Plano de Cuidados Completo
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Droplets className="w-6 h-6 text-blue-500 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Rega</h4>
+                      <p className="text-muted-foreground">{plant.wateringFrequency}</p>
+                    </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                    <Sun className="w-6 h-6 text-yellow-500 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Luz Solar</h4>
+                      <p className="text-muted-foreground">{plant.sunlightNeeds}</p>
+                    </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                    <Wrench className="w-6 h-6 text-gray-500 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Tratamentos</h4>
+                      <p className="text-muted-foreground">{plant.treatments}</p>
+                    </div>
+                  </div>
+                   <div className="flex items-start gap-3">
+                    <Sparkles className="w-6 h-6 text-amber-500 mt-1" />
+                    <div>
+                      <h4 className="font-semibold">Dicas de Especialista</h4>
+                      <p className="text-muted-foreground">{plant.expertTips}</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  Pragas e Doenças Potenciais
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground">{plant.potentialPestsAndDiseases}</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="lg:col-span-1">
+        <PlantJournal plantId={plant.id} />
+      </div>
+    </div>
+  );
+}
