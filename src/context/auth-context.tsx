@@ -52,6 +52,8 @@ const mapFirebaseError = (error: AuthError): string => {
       return 'A senha é muito fraca. Tente uma mais forte.';
     case 'auth/popup-closed-by-user':
       return 'O processo de login com o Google foi cancelado.';
+    case 'auth/network-request-failed':
+      return 'Falha de rede. Verifique sua conexão com a internet.';
     default:
       return 'Ocorreu um erro inesperado. Por favor, tente novamente.';
   }
