@@ -8,7 +8,7 @@ const firebaseConfig: FirebaseOptions = {
     apiKey: "AIzaSyBZlz6yRqt4rLUTmiFKWOrMjo1PDpMbBG8",
     authDomain: "izybotanic.firebaseapp.com",
     projectId: "izybotanic",
-    storageBucket: "izybotanic.firebasestorage.app",
+    storageBucket: "izybotanic.appspot.com",
     messagingSenderId: "648909338628",
     appId: "1:648909338628:web:e5000b690e4b3d37675d51",
     measurementId: "G-ZBQTLG0ERH"
