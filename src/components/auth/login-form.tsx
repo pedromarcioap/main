@@ -8,6 +8,7 @@ import * as z from 'zod';
 import Link from 'next/link';
 
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,13 +30,6 @@ import { Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { IzyBotanicLogo } from '../icons';
 
-import { auth } from '@/lib/firebase';
-import {
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-
 const formSchema = z.object({
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
   password: z.string().min(1, { message: 'A senha é obrigatória.' }),
@@ -43,6 +37,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const { toast } = useToast();
+  const { loginWithEmail, loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
@@ -55,18 +50,13 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
+      await loginWithEmail(values.email, values.password);
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Falha no Login',
-        description:
-          error.code === 'auth/invalid-credential' ||
-          error.code === 'auth/wrong-password' ||
-          error.code === 'auth/user-not-found'
-            ? 'Email ou senha inválidos.'
-            : 'Ocorreu um erro. Por favor, tente novamente.',
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
@@ -76,15 +66,13 @@ export function LoginForm() {
   async function handleGoogleLogin() {
     setIsGoogleLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await loginWithGoogle();
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Falha no Login com Google',
-        description:
-          'Não foi possível fazer login com o Google. Por favor, tente novamente.',
+        description: error.message,
       });
     } finally {
       setIsGoogleLoading(false);

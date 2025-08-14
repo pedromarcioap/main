@@ -8,6 +8,7 @@ import * as z from 'zod';
 import Link from 'next/link';
 
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,11 +29,6 @@ import {
 import { IzyBotanicLogo } from '@/components/icons';
 import { Loader2 } from 'lucide-react';
 
-import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import type { User } from '@/types';
-
 const formSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   email: z.string().email({ message: 'Por favor, insira um email válido.' }),
@@ -43,6 +39,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const { toast } = useToast();
+  const { signupWithEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -58,40 +55,13 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        values.email,
-        values.password
-      );
-
-      // Atualiza o perfil do Firebase Auth com o nome
-      await updateProfile(userCredential.user, {
-        displayName: values.name,
-      });
-
-      // Cria o documento do usuário no Firestore
-      const newUser: User = {
-        id: userCredential.user.uid,
-        name: values.name,
-        email: values.email,
-        nickname: '',
-        phone: '',
-        photoURL: '',
-        plants: [],
-        journal: [],
-        achievements: [],
-        chatHistory: [],
-      };
-      await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
+      await signupWithEmail(values.name, values.email, values.password);
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Falha no Cadastro',
-        description:
-          error.code === 'auth/email-already-in-use'
-            ? 'Este email já está em uso.'
-            : 'Ocorreu um erro. Por favor, tente novamente.',
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
