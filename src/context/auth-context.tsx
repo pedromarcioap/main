@@ -45,6 +45,8 @@ const googleProvider = new GoogleAuthProvider();
 
 const mapFirebaseError = (error: AuthError): string => {
   switch (error.code) {
+    case 'auth/unauthorized-domain':
+      return 'Domínio não autorizado. Por favor, adicione "localhost" aos domínios autorizados no seu console do Firebase (Authentication > Settings).';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
@@ -94,16 +96,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   useEffect(() => {
     const processRedirectResult = async () => {
+        setLoading(true);
         try {
-            // Check for redirect result on app load
             const result = await getRedirectResult(auth);
             if (result) {
-                // This will trigger onAuthStateChanged below
+                // User is signed in. onAuthStateChanged will handle the rest.
             }
         } catch (error) {
-            console.error('Error getting redirect result:', error);
+            console.error('Error getting redirect result:', mapFirebaseError(error as AuthError));
         }
+        setLoading(false);
     };
+
     processRedirectResult();
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
