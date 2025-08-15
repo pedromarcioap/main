@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,10 +36,18 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const { toast } = useToast();
-  const { loginWithEmail, loginWithGoogle } = useAuth();
+  const { loginWithEmail, loginWithGoogle, developerLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isDevMode, setIsDevMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Ensure window is defined before using it
+    if (typeof window !== 'undefined') {
+      setIsDevMode(window.location.hostname === 'localhost');
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,7 +74,7 @@ export function LoginForm() {
     setIsGoogleLoading(true);
     try {
       await loginWithGoogle();
-      router.push('/dashboard');
+      // On success, onAuthStateChanged will redirect
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -75,6 +83,22 @@ export function LoginForm() {
       });
     } finally {
       setIsGoogleLoading(false);
+    }
+  }
+
+  async function handleDeveloperLogin() {
+    setIsLoading(true);
+    try {
+      await developerLogin();
+      router.push('/dashboard');
+    } catch (error: any) {
+       toast({
+        variant: 'destructive',
+        title: 'Falha no Login Dev',
+        description: 'Não foi possível simular o login.',
+      });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -143,7 +167,7 @@ export function LoginForm() {
               className="h-12 w-full text-base"
               disabled={isLoading || isGoogleLoading}
             >
-              {isLoading && <Loader2 className="h-6 w-6 animate-spin" />}
+              {isLoading && !isGoogleLoading && <Loader2 className="h-6 w-6 animate-spin" />}
               {!isLoading && 'Entrar'}
             </Button>
           </form>
@@ -156,35 +180,47 @@ export function LoginForm() {
             <span className="bg-card px-2 text-muted-foreground">OU</span>
           </div>
         </div>
-        <Button
-          variant="outline"
-          className="h-12 w-full justify-center border-border text-base font-normal text-muted-foreground"
-          onClick={handleGoogleLogin}
-          disabled={isLoading || isGoogleLoading}
-        >
-          {isGoogleLoading ? (
-            <Loader2 className="h-6 w-6 animate-spin" />
-          ) : (
-            <>
-              <svg
-                className="mr-2 h-5 w-5"
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="fab"
-                data-icon="google"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 488 512"
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="outline"
+            className="h-12 w-full justify-center border-border text-base font-normal text-muted-foreground"
+            onClick={handleGoogleLogin}
+            disabled={isLoading || isGoogleLoading}
+          >
+            {isGoogleLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              <>
+                <svg
+                  className="mr-2 h-5 w-5"
+                  aria-hidden="true"
+                  focusable="false"
+                  data-prefix="fab"
+                  data-icon="google"
+                  role="img"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 488 512"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M488 261.8C488 403.3 381.5 512 244 512 109.8 512 0 402.2 0 261.8S109.8 11.8 244 11.8c70.3 0 129.5 28.5 173.4 72.8l-65.8 64.3c-23.5-22.5-56-36.5-98.6-36.5-74.3 0-134.3 60-134.3 134.3s60 134.3 134.3 134.3c81.7 0 119.5-56.5 124-87.5h-124v-75h236.1c2.4 12.8 3.9 26.5 3.9 41.5z"
+                  ></path>
+                </svg>
+                Entrar com Google
+              </>
+            )}
+          </Button>
+          {isDevMode && (
+              <Button
+                variant="destructive"
+                className="h-12 w-full justify-center text-base"
+                onClick={handleDeveloperLogin}
+                disabled={isLoading || isGoogleLoading}
               >
-                <path
-                  fill="currentColor"
-                  d="M488 261.8C488 403.3 381.5 512 244 512 109.8 512 0 402.2 0 261.8S109.8 11.8 244 11.8c70.3 0 129.5 28.5 173.4 72.8l-65.8 64.3c-23.5-22.5-56-36.5-98.6-36.5-74.3 0-134.3 60-134.3 134.3s60 134.3 134.3 134.3c81.7 0 119.5-56.5 124-87.5h-124v-75h236.1c2.4 12.8 3.9 26.5 3.9 41.5z"
-                ></path>
-              </svg>
-              Entrar com Google
-            </>
-          )}
-        </Button>
+                {isLoading && !isGoogleLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "Entrar como Desenvolvedor"}
+              </Button>
+            )}
+        </div>
         <div className="mt-8 text-center text-sm">
           <span className="text-muted-foreground">Não tem uma conta? </span>
           <Link

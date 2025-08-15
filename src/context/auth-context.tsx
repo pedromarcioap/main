@@ -34,6 +34,7 @@ export interface AuthContextType {
   signupWithEmail: (name: string, email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: User) => Promise<void>;
+  developerLogin: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -45,7 +46,7 @@ const googleProvider = new GoogleAuthProvider();
 const mapFirebaseError = (error: AuthError): string => {
   switch (error.code) {
     case 'auth/unauthorized-domain':
-      return 'Domínio não autorizado. Por favor, adicione "localhost" aos domínios autorizados no seu console do Firebase (Authentication > Settings).';
+      return 'Este domínio não está autorizado para operações de autenticação. Por favor, adicione "localhost" aos domínios autorizados no seu console do Firebase.';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
     case 'auth/user-not-found':
@@ -127,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithPopup(auth, googleProvider);
       // onAuthStateChanged will handle the rest
     } catch (error) {
+      console.error("Detailed Google Login Error:", error);
       throw new Error(mapFirebaseError(error as AuthError));
     }
   };
@@ -163,6 +165,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setLoading(false);
   }, []);
+  
+  const developerLogin = useCallback(async () => {
+    setLoading(true);
+    const devUser: User = {
+      id: 'dev-user-id',
+      name: 'Desenvolvedor',
+      email: 'dev@izybotanic.com',
+      nickname: 'Dev',
+      phone: '123456789',
+      photoURL: '',
+      plants: [],
+      journal: [],
+      achievements: ['first-sprout', 'chatty-gardener'],
+      chatHistory: [
+        {role: 'bot', content: 'Bem-vindo, Desenvolvedor! Como posso ajudar hoje?'}
+      ]
+    };
+    setUser(devUser);
+    setLoading(false);
+  }, []);
 
   const value = {
     user,
@@ -172,6 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signupWithEmail,
     logout,
     updateUser,
+    developerLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
