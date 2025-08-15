@@ -17,7 +17,8 @@ import {
   updateProfile,
   type User as FirebaseUser,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -53,6 +54,7 @@ const mapFirebaseError = (error: AuthError): string => {
     case 'auth/weak-password':
       return 'A senha é muito fraca. Tente uma mais forte.';
     case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
       return 'O processo de login com o Google foi cancelado.';
     case 'auth/network-request-failed':
       return 'Falha de rede. Verifique sua conexão com a internet.';
@@ -89,8 +91,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return newUser;
     }
   }, []);
-
+  
   useEffect(() => {
+    const processRedirectResult = async () => {
+        try {
+            // Check for redirect result on app load
+            const result = await getRedirectResult(auth);
+            if (result) {
+                // This will trigger onAuthStateChanged below
+            }
+        } catch (error) {
+            console.error('Error getting redirect result:', error);
+        }
+    };
+    processRedirectResult();
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
@@ -121,8 +136,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      setLoading(true); // Indicate loading state before redirect
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
+      setLoading(false);
       throw new Error(mapFirebaseError(error as AuthError));
     }
   };
@@ -135,8 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         pass
       );
       await updateProfile(userCredential.user, { displayName: name });
-      // The onAuthStateChanged listener will handle creating the user document in Firestore
-      // after this, so no need to call getOrCreateUser here.
+      // onAuthStateChanged will handle creating the user doc.
     } catch (error) {
       throw new Error(mapFirebaseError(error as AuthError));
     }
