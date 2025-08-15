@@ -10,16 +10,12 @@ function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Este efeito redirecionará o usuário para o dashboard se ele já estiver logado.
-  // Ele é executado somente após o carregamento inicial estar completo.
   useEffect(() => {
     if (!loading && user) {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
 
-  // Enquanto o estado de 'loading' está ativo, mostramos um loader em tela cheia para
-  // evitar qualquer "flash" do formulário de login.
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -32,7 +28,7 @@ function LoginPage() {
     );
   }
 
-  // Se não estiver carregando e não houver usuário, é seguro exibir o formulário de login.
+  // If not loading and no user, it's safe to show the login form.
   if (!user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -41,8 +37,8 @@ function LoginPage() {
     );
   }
 
-  // Se o usuário estiver logado (e a verificação de 'loading' já passou), renderizamos um loader
-  // como fallback enquanto o efeito de redirecionamento está em execução.
+  // If the user is logged in (and loading check has passed), render a loader
+  // as a fallback while the redirect effect runs.
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">

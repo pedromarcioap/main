@@ -152,6 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    setLoading(true);
     await signOut(auth);
     setUser(null);
     setLoading(false);
