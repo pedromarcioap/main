@@ -13,8 +13,6 @@ import {
   onAuthStateChanged,
   signOut,
   signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   updateProfile,
   type User as FirebaseUser,
@@ -30,7 +28,6 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginWithEmail: (email: string, pass: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
   signupWithEmail: (name: string, email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: User) => Promise<void>;
@@ -116,15 +113,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      throw new Error(mapFirebaseError(error as AuthError));
-    }
-  };
-
   const signupWithEmail = async (name: string, email: string, pass: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -162,7 +150,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     loginWithEmail,
-    loginWithGoogle,
     signupWithEmail,
     logout,
     updateUser,

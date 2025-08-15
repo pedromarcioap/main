@@ -27,7 +27,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { IzyBotanicLogo } from '../icons';
 
 const formSchema = z.object({
@@ -37,9 +36,8 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const { toast } = useToast();
-  const { loginWithEmail, loginWithGoogle } = useAuth();
+  const { loginWithEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,22 +58,6 @@ export function LoginForm() {
       });
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function handleGoogleLogin() {
-    setIsGoogleLoading(true);
-    try {
-      await loginWithGoogle();
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Falha no Login com Google',
-        description: error.message,
-      });
-    } finally {
-      setIsGoogleLoading(false);
     }
   }
 
@@ -109,7 +91,7 @@ export function LoginForm() {
                       placeholder="nome@exemplo.com"
                       autoComplete="email"
                       {...field}
-                      disabled={isLoading || isGoogleLoading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,7 +113,7 @@ export function LoginForm() {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       {...field}
-                      disabled={isLoading || isGoogleLoading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -141,46 +123,13 @@ export function LoginForm() {
             <Button
               type="submit"
               className="h-12 w-full text-base"
-              disabled={isLoading || isGoogleLoading}
+              disabled={isLoading}
             >
               {isLoading && <Loader2 className="h-6 w-6 animate-spin" />}
               {!isLoading && 'Entrar'}
             </Button>
           </form>
         </Form>
-        <div className="relative my-6">
-          <Separator />
-          <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center bg-card px-2">
-            <span className="text-sm text-muted-foreground">OU</span>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          className="h-12 w-full justify-center border-border text-base font-normal text-muted-foreground"
-          onClick={handleGoogleLogin}
-          disabled={isLoading || isGoogleLoading}
-        >
-          {isGoogleLoading ? (
-            <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-          ) : (
-            <svg
-              className="mr-3 h-5 w-5"
-              aria-hidden="true"
-              focusable="false"
-              data-prefix="fab"
-              data-icon="google"
-              role="img"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 488 512"
-            >
-              <path
-                fill="currentColor"
-                d="M488 261.8C488 403.3 381.5 512 244 512 109.8 512 0 402.2 0 261.8 0 120.5 109.8 8 244 8c70.4 0 129.8 27.8 174.3 72.8l-67.4 64.8C288.5 99.8 268.4 88 244 88c-66.2 0-120 53.8-120 120s53.8 120 120 120c72.5 0 111.4-52.4 114.9-78.2h-114.9V209.7h194.2c2.1 12.3 3.8 24.9 3.8 38.2z"
-              ></path>
-            </svg>
-          )}
-          Entrar com Google
-        </Button>
         <div className="mt-8 text-center text-sm">
           <span className="text-muted-foreground">Não tem uma conta? </span>
           <Link
