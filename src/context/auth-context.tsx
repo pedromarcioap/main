@@ -57,6 +57,7 @@ const mapFirebaseError = (error: AuthError): string => {
     case 'auth/network-request-failed':
       return 'Falha de rede. Verifique sua conexão com a internet.';
     default:
+      console.error('Firebase Auth Error:', error.code, error.message);
       return 'Ocorreu um erro inesperado. Por favor, tente novamente.';
   }
 };
@@ -135,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
       await updateProfile(userCredential.user, { displayName: name });
       // The onAuthStateChanged listener will handle creating the user document in Firestore
+      // after this, so no need to call getOrCreateUser here.
     } catch (error) {
       throw new Error(mapFirebaseError(error as AuthError));
     }
