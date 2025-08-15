@@ -16,6 +16,8 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   type User as FirebaseUser,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -28,6 +30,7 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginWithEmail: (email: string, pass: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   signupWithEmail: (name: string, email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: User) => Promise<void>;
@@ -36,6 +39,8 @@ export interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
+
+const googleProvider = new GoogleAuthProvider();
 
 const mapFirebaseError = (error: AuthError): string => {
   switch (error.code) {
@@ -113,6 +118,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      throw new Error(mapFirebaseError(error as AuthError));
+    }
+  };
+
   const signupWithEmail = async (name: string, email: string, pass: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -150,6 +163,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     loginWithEmail,
+    loginWithGoogle,
     signupWithEmail,
     logout,
     updateUser,
