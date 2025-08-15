@@ -17,8 +17,7 @@ import {
   updateProfile,
   type User as FirebaseUser,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -93,23 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return newUser;
     }
   }, []);
-  
+
   useEffect(() => {
-    const processRedirectResult = async () => {
-        setLoading(true);
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                // User is signed in. onAuthStateChanged will handle the rest.
-            }
-        } catch (error) {
-            console.error('Error getting redirect result:', mapFirebaseError(error as AuthError));
-        }
-        setLoading(false);
-    };
-
-    processRedirectResult();
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
@@ -140,10 +124,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithGoogle = async () => {
     try {
-      setLoading(true); // Indicate loading state before redirect
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged will handle the rest
     } catch (error) {
-      setLoading(false);
       throw new Error(mapFirebaseError(error as AuthError));
     }
   };
