@@ -74,9 +74,9 @@ export function LoginForm() {
     setIsGoogleLoading(true);
     try {
       await loginWithGoogle();
-      // On success, onAuthStateChanged will redirect
+      // On success, onAuthStateChanged will handle the redirect to dashboard
     } catch (error: any) {
-      toast({
+       toast({
         variant: 'destructive',
         title: 'Falha no Login com Google',
         description: error.message,
@@ -85,6 +85,7 @@ export function LoginForm() {
       setIsGoogleLoading(false);
     }
   }
+
 
   async function handleDeveloperLogin() {
     setIsLoading(true);
@@ -185,7 +186,7 @@ export function LoginForm() {
             variant="outline"
             className="h-12 w-full justify-center border-border text-base font-normal text-muted-foreground"
             onClick={handleGoogleLogin}
-            disabled={isLoading || isGoogleLoading}
+            disabled={isLoading || isGoogleLoading || isDevMode}
           >
             {isGoogleLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
