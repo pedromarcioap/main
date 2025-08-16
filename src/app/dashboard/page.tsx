@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Flower2, BookOpen, Bot, Award, CalendarDays } from 'lucide-react';
+import { Flower2, Bot, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -21,7 +21,7 @@ function DashboardPage() {
     return 'Boa noite';
   };
 
-  const firstName = user.name.split(' ')[0];
+  const firstName = user.name ? user.name.split(' ')[0] : 'Jardineiro(a)';
 
   return (
     <div className="flex flex-col gap-8">
