@@ -18,6 +18,8 @@ import {
   type User as FirebaseUser,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -69,6 +71,7 @@ const mapFirebaseError = (error: AuthError): string => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDevMode, setIsDevMode] = useState(false);
 
   const getOrCreateUser = useCallback(async (firebaseUser: FirebaseUser): Promise<User> => {
     const userRef = doc(db, 'users', firebaseUser.uid);
@@ -96,6 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (isDevMode) return; // Do not interfere with developer login
+
       setLoading(true);
       if (firebaseUser) {
         try {
@@ -103,7 +108,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(userData);
         } catch (error) {
           console.error('Failed to fetch user data, logging out.', error);
-          await signOut(auth);
+          if (auth.currentUser) {
+            await signOut(auth);
+          }
           setUser(null);
         }
       } else {
@@ -113,7 +120,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [getOrCreateUser]);
+  }, [getOrCreateUser, isDevMode]);
+
 
   const loginWithEmail = async (email: string, pass: string) => {
     try {
@@ -126,7 +134,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged will handle the rest
     } catch (error) {
       throw new Error(mapFirebaseError(error as AuthError));
     }
@@ -149,6 +156,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUser = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
     try {
+      // In dev mode, just update the state
+      if (isDevMode) {
+        setUser(updatedUserData);
+        return;
+      }
       const userRef = doc(db, 'users', updatedUserData.id);
       await setDoc(userRef, updatedUserData, { merge: true });
       setUser(updatedUserData);
@@ -156,20 +168,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Falha ao atualizar o usuário:', error);
       throw new Error('Não foi possível salvar suas alterações.');
     }
-  }, []);
+  }, [isDevMode]);
 
   const logout = useCallback(async () => {
     setLoading(true);
-    // When using dev login, auth might not be initialized with a user
+    if (isDevMode) {
+      setIsDevMode(false);
+    }
     if (auth.currentUser) {
       await signOut(auth);
     }
     setUser(null);
     setLoading(false);
-  }, []);
+  }, [isDevMode]);
   
   const developerLogin = useCallback(async () => {
     setLoading(true);
+    setIsDevMode(true);
     const devUser: User = {
       id: 'dev-user-id',
       name: 'Desenvolvedor',
