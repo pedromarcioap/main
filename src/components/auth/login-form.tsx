@@ -134,7 +134,7 @@ export function LoginForm() {
                       placeholder="nome@exemplo.com"
                       autoComplete="email"
                       {...field}
-                      disabled={isLoading || isGoogleLoading}
+                      disabled={isLoading || isGoogleLoading || isDevMode}
                     />
                   </FormControl>
                   <FormMessage />
@@ -156,7 +156,7 @@ export function LoginForm() {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       {...field}
-                      disabled={isLoading || isGoogleLoading}
+                      disabled={isLoading || isGoogleLoading || isDevMode}
                     />
                   </FormControl>
                   <FormMessage />
@@ -166,7 +166,7 @@ export function LoginForm() {
             <Button
               type="submit"
               className="h-12 w-full text-base"
-              disabled={isLoading || isGoogleLoading}
+              disabled={isLoading || isGoogleLoading || isDevMode}
             >
               {isLoading && !isGoogleLoading && <Loader2 className="h-6 w-6 animate-spin" />}
               {!isLoading && 'Entrar'}
