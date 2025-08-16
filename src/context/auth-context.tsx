@@ -128,7 +128,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithPopup(auth, googleProvider);
       // onAuthStateChanged will handle the rest
     } catch (error) {
-      console.error("Detailed Google Login Error:", error);
       throw new Error(mapFirebaseError(error as AuthError));
     }
   };
@@ -161,7 +160,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(async () => {
     setLoading(true);
-    await signOut(auth);
+    // When using dev login, auth might not be initialized with a user
+    if (auth.currentUser) {
+      await signOut(auth);
+    }
     setUser(null);
     setLoading(false);
   }, []);
