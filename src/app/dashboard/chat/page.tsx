@@ -47,9 +47,12 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const plantAnalysis = user.plants.map(p => 
-        `Apelido: ${p.nickname}, Espécie: ${p.species}, Saúde: ${p.health}, Diagnóstico: ${p.detailedDiagnosis}`
-      ).join('\n');
+      const plantAnalysis = user.plants.length > 0 
+        ? `Aqui está um resumo das plantas do usuário: ` + user.plants.map(p => 
+            `- ${p.nickname} (${p.species})`
+          ).join('. ')
+        : "O usuário ainda não adicionou nenhuma planta.";
+
 
       const chatResponse = await plantCareExpertChat({
         plantAnalysis: plantAnalysis,

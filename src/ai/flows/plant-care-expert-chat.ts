@@ -23,7 +23,7 @@ const PlantCareExpertChatInputSchema = z.object({
         content: z.string(),
       })
     )
-    .optional()
+    .default([])
     .describe('O histórico do chat.'),
   userMessage: z
     .string()
@@ -60,14 +60,14 @@ Você tem acesso às seguintes informações para contextualizar sua resposta:
 
 2.  **Histórico da Conversa Recente**:
 {{#each chatHistory}}
-{{#if (eq role "user")}}User{{else}}Bot{{/if}}: {{{this.content}}}
+{{role}}: {{{this.content}}}
 {{/each}}
 
 A nova pergunta do usuário é:
-User: {{{userMessage}}}
+user: {{{userMessage}}}
 
 Com base em todo o contexto fornecido, formule sua resposta como especialista. Seja direto e útil.
-Bot:`,
+bot:`,
 });
 
 const plantCareExpertChatFlow = ai.defineFlow(
