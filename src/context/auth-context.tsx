@@ -21,7 +21,6 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-// Define the shape of the authentication error
 interface AuthError extends Error {
   code?: string;
 }
@@ -172,18 +171,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUser = useCallback(async (updatedUserData: User) => {
     if (!updatedUserData?.id) return;
+    
+    // Always update local state first for immediate UI feedback
+    setUser(updatedUserData);
+
+    // If in dev mode, don't attempt to write to Firestore
+    if (isDevMode) {
+      return;
+    }
+
     try {
-      // In dev mode, just update the state
-      if (isDevMode) {
-        setUser(updatedUserData);
-        return;
-      }
       const userRef = doc(db, 'users', updatedUserData.id);
       await setDoc(userRef, updatedUserData, { merge: true });
-      setUser(updatedUserData);
     } catch (error) {
-      console.error('Falha ao atualizar o usuário:', error);
-      throw new Error('Não foi possível salvar suas alterações.');
+      console.error('Falha ao atualizar o usuário no Firestore:', error);
+      // Optional: Handle Firestore update failure, e.g., show a toast
+      // The local state is already updated, so the UI remains consistent for the user
+      throw new Error('Não foi possível salvar suas alterações no servidor.');
     }
   }, [isDevMode]);
 
