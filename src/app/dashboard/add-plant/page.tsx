@@ -85,7 +85,6 @@ export default function AddPlantPage() {
     }
     
     setIsSubmitting(true);
-    let success = false;
 
     try {
       const base64Photo = await fileToDataUri(photoFile);
@@ -160,7 +159,7 @@ export default function AddPlantPage() {
         description: `${data.nickname} agora faz parte do seu jardim.`,
       });
       
-      success = true;
+      router.push('/dashboard/my-garden');
 
     } catch (error) {
       console.error('Erro ao adicionar planta:', error);
@@ -170,11 +169,7 @@ export default function AddPlantPage() {
         description:
           'Não foi possível analisar a imagem da sua planta. Tente novamente.',
       });
-    } finally {
-      setIsSubmitting(false);
-      if (success) {
-        router.push('/dashboard/my-garden');
-      }
+       setIsSubmitting(false);
     }
   };
 
