@@ -151,7 +151,6 @@ export default function AddPlantPage() {
         })
       }
 
-
       await updateUser(updatedUser);
 
       toast({

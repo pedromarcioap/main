@@ -170,26 +170,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateUser = useCallback(async (updatedUserData: User) => {
-    if (!updatedUserData?.id) return;
-    
-    // Always update local state first for immediate UI feedback
-    setUser(updatedUserData);
+    if (!updatedUserData?.id) {
+        throw new Error("User ID is missing.");
+    }
 
-    // If in dev mode, don't attempt to write to Firestore
     if (isDevMode) {
+      // In dev mode, just update local state for immediate UI feedback
+      setUser(updatedUserData);
       return;
     }
 
     try {
       const userRef = doc(db, 'users', updatedUserData.id);
+      // Write to Firestore first
       await setDoc(userRef, updatedUserData, { merge: true });
+      // Then update local state to reflect the persisted data
+      setUser(updatedUserData);
     } catch (error) {
       console.error('Falha ao atualizar o usuário no Firestore:', error);
-      // Optional: Handle Firestore update failure, e.g., show a toast
-      // The local state is already updated, so the UI remains consistent for the user
       throw new Error('Não foi possível salvar suas alterações no servidor.');
     }
   }, [isDevMode]);
+
 
   const logout = useCallback(async () => {
     setLoading(true);
