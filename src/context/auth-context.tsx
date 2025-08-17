@@ -73,27 +73,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const getOrCreateUser = useCallback(async (firebaseUser: FirebaseUser): Promise<User> => {
     const userRef = doc(db, 'users', firebaseUser.uid);
-    const userDoc = await getDoc(userRef);
+    try {
+        const userDoc = await getDoc(userRef);
 
-    if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() } as User;
-    } else {
-      const newUser: User = {
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName || 'Usuário',
-        email: firebaseUser.email!,
-        nickname: '',
-        phone: '',
-        photoURL: firebaseUser.photoURL || '',
-        plants: [],
-        journal: [],
-        achievements: [],
-        chatHistory: [],
-      };
-      await setDoc(userRef, newUser);
-      return newUser;
+        if (userDoc.exists()) {
+            return { id: userDoc.id, ...userDoc.data() } as User;
+        } else {
+            const newUser: User = {
+                id: firebaseUser.uid,
+                name: firebaseUser.displayName || 'Usuário',
+                email: firebaseUser.email!,
+                nickname: '',
+                phone: '',
+                photoURL: firebaseUser.photoURL || '',
+                plants: [],
+                journal: [],
+                achievements: [],
+                chatHistory: [],
+            };
+            await setDoc(userRef, newUser);
+            return newUser;
+        }
+    } catch (error) {
+        console.warn("Firestore is offline or unreachable. Using fallback user data.", error);
+        // Fallback: create a user object without Firestore data.
+        // This allows the user to log in even if the database is temporarily unavailable.
+        return {
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName || 'Usuário',
+            email: firebaseUser.email!,
+            nickname: '',
+            phone: '',
+            photoURL: firebaseUser.photoURL || '',
+            plants: [],
+            journal: [],
+            achievements: [],
+            chatHistory: [],
+        };
     }
-  }, []);
+}, []);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {

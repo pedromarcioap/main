@@ -39,13 +39,13 @@ export function LoginForm() {
   const { loginWithEmail, loginWithGoogle, developerLogin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isDevMode, setIsDevMode] = useState(false);
+  const [isDevLoginAvailable, setIsDevLoginAvailable] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     // Ensure window is defined before using it
     if (typeof window !== 'undefined') {
-      setIsDevMode(window.location.hostname === 'localhost');
+      setIsDevLoginAvailable(window.location.hostname === 'localhost');
     }
   }, []);
 
@@ -134,7 +134,7 @@ export function LoginForm() {
                       placeholder="nome@exemplo.com"
                       autoComplete="email"
                       {...field}
-                      disabled={isLoading || isGoogleLoading || isDevMode}
+                      disabled={isLoading || isGoogleLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -156,7 +156,7 @@ export function LoginForm() {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       {...field}
-                      disabled={isLoading || isGoogleLoading || isDevMode}
+                      disabled={isLoading || isGoogleLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -166,7 +166,7 @@ export function LoginForm() {
             <Button
               type="submit"
               className="h-12 w-full text-base"
-              disabled={isLoading || isGoogleLoading || isDevMode}
+              disabled={isLoading || isGoogleLoading}
             >
               {isLoading && !isGoogleLoading && <Loader2 className="h-6 w-6 animate-spin" />}
               {!isLoading && 'Entrar'}
@@ -186,7 +186,7 @@ export function LoginForm() {
             variant="outline"
             className="h-12 w-full justify-center border-border text-base font-normal text-muted-foreground"
             onClick={handleGoogleLogin}
-            disabled={isLoading || isGoogleLoading || isDevMode}
+            disabled={isLoading || isGoogleLoading}
           >
             {isGoogleLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -211,7 +211,7 @@ export function LoginForm() {
               </>
             )}
           </Button>
-          {isDevMode && (
+          {isDevLoginAvailable && (
               <Button
                 variant="destructive"
                 className="h-12 w-full justify-center text-base"
