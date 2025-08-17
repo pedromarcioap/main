@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { ChatMessage } from '@/types';
+import type { ChatMessage } from '@/types';
 
 const PlantCareExpertChatInputSchema = z.object({
   plantAnalysis: z
