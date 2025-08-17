@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { analyzePlantImage } from '@/ai/flows/analyze-plant-image';
 import { useAuth } from '@/hooks/use-auth';
-import type { Plant } from '@/types';
+import type { Plant, User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -98,44 +98,31 @@ export default function AddPlantPage() {
         ...analysisResult,
       };
 
-      const updatedUser = {
-        ...user,
-        plants: [...user.plants, newPlant],
-      };
-      
+      const newPlants = [...user.plants, newPlant];
       const newAchievements: string[] = [];
 
-      // Check for 'first-sprout' achievement
       if (!user.achievements.includes('first-sprout')) {
         newAchievements.push('first-sprout');
       }
-
-      // Check for 'green-thumb' achievement
-      if (
-        updatedUser.plants.length >= 5 &&
-        !user.achievements.includes('green-thumb')
-      ) {
+      if (newPlants.length >= 5 && !user.achievements.includes('green-thumb')) {
         newAchievements.push('green-thumb');
       }
-      
-      // Check for 'enthusiast-collector' achievement
-      if (
-        updatedUser.plants.length >= 10 &&
-        !user.achievements.includes('enthusiast-collector')
-      ) {
+      if (newPlants.length >= 10 && !user.achievements.includes('enthusiast-collector')) {
         newAchievements.push('enthusiast-collector');
       }
-      
-      // Check for 'master-botanist' achievement
-      if (
-        updatedUser.plants.length >= 25 &&
-        !user.achievements.includes('master-botanist')
-      ) {
+      if (newPlants.length >= 25 && !user.achievements.includes('master-botanist')) {
         newAchievements.push('master-botanist');
       }
+      
+      const updatedUser: User = {
+        ...user,
+        plants: newPlants,
+        achievements: [...user.achievements, ...newAchievements],
+      };
+
+      await updateUser(updatedUser);
 
       if (newAchievements.length > 0) {
-        updatedUser.achievements.push(...newAchievements);
         const achievementMessages: {[key: string]: string} = {
             'first-sprout': 'Primeiro Broto: Você adicionou sua primeira planta!',
             'green-thumb': 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
@@ -150,8 +137,6 @@ export default function AddPlantPage() {
             });
         })
       }
-
-      await updateUser(updatedUser);
 
       toast({
         title: 'Planta Adicionada!',
@@ -168,6 +153,7 @@ export default function AddPlantPage() {
         description:
           'Não foi possível analisar a imagem da sua planta. Tente novamente.',
       });
+    } finally {
        setIsSubmitting(false);
     }
   };
