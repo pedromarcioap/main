@@ -60,11 +60,7 @@ Você tem acesso às seguintes informações para contextualizar sua resposta:
 
 2.  **Histórico da Conversa Recente**:
 {{#each chatHistory}}
-  {{#if (eq this.role "user")}}
-User: {{{this.content}}}
-  {{else}}
-Bot: {{{this.content}}}
-  {{/if}}
+{{#if (eq role "user")}}User{{else}}Bot{{/if}}: {{{this.content}}}
 {{/each}}
 
 A nova pergunta do usuário é:
