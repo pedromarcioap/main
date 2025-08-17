@@ -158,7 +158,7 @@ export default function AddPlantPage() {
         description: `${data.nickname} agora faz parte do seu jardim.`,
       });
 
-      router.push(`/dashboard/my-garden/${newPlant.id}`);
+      router.push(`/dashboard/my-garden`);
     } catch (error) {
       console.error('Erro ao adicionar planta:', error);
       toast({
