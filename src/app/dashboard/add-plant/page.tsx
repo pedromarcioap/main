@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -84,6 +85,7 @@ export default function AddPlantPage() {
     }
     
     setIsSubmitting(true);
+    let success = false;
 
     try {
       const base64Photo = await fileToDataUri(photoFile);
@@ -157,8 +159,9 @@ export default function AddPlantPage() {
         title: 'Planta Adicionada!',
         description: `${data.nickname} agora faz parte do seu jardim.`,
       });
+      
+      success = true;
 
-      router.push(`/dashboard/my-garden`);
     } catch (error) {
       console.error('Erro ao adicionar planta:', error);
       toast({
@@ -169,6 +172,9 @@ export default function AddPlantPage() {
       });
     } finally {
       setIsSubmitting(false);
+      if (success) {
+        router.push('/dashboard/my-garden');
+      }
     }
   };
 
