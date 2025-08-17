@@ -129,7 +129,7 @@ export default function ProfilePage() {
                   <FormItem className="flex flex-col items-center">
                     <FormLabel>Foto de Perfil</FormLabel>
                     <FormControl className="mt-0">
-                      <>
+                      <div>
                         <input
                           type="file"
                           accept="image/*"
@@ -149,7 +149,7 @@ export default function ProfilePage() {
                             <UserIcon className="h-12 w-12" />
                           </AvatarFallback>
                         </Avatar>
-                      </>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
