@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, {
@@ -175,9 +176,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (isDevMode) {
-      // In dev mode, just update local state for immediate UI feedback
+      // In dev mode, just update local state and resolve immediately
       setUser(updatedUserData);
-      return;
+      return Promise.resolve();
     }
 
     try {

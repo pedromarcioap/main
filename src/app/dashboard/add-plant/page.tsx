@@ -84,6 +84,7 @@ export default function AddPlantPage() {
       return;
     }
     
+    let success = false;
     setIsSubmitting(true);
 
     try {
@@ -99,25 +100,26 @@ export default function AddPlantPage() {
       };
 
       const newPlants = [...user.plants, newPlant];
+      const currentAchievements = [...user.achievements];
       const newAchievements: string[] = [];
 
-      if (!user.achievements.includes('first-sprout')) {
+      if (!currentAchievements.includes('first-sprout')) {
         newAchievements.push('first-sprout');
       }
-      if (newPlants.length >= 5 && !user.achievements.includes('green-thumb')) {
+      if (newPlants.length >= 5 && !currentAchievements.includes('green-thumb')) {
         newAchievements.push('green-thumb');
       }
-      if (newPlants.length >= 10 && !user.achievements.includes('enthusiast-collector')) {
+      if (newPlants.length >= 10 && !currentAchievements.includes('enthusiast-collector')) {
         newAchievements.push('enthusiast-collector');
       }
-      if (newPlants.length >= 25 && !user.achievements.includes('master-botanist')) {
+      if (newPlants.length >= 25 && !currentAchievements.includes('master-botanist')) {
         newAchievements.push('master-botanist');
       }
       
       const updatedUser: User = {
         ...user,
         plants: newPlants,
-        achievements: [...user.achievements, ...newAchievements],
+        achievements: [...currentAchievements, ...newAchievements],
       };
 
       await updateUser(updatedUser);
@@ -143,7 +145,7 @@ export default function AddPlantPage() {
         description: `${data.nickname} agora faz parte do seu jardim.`,
       });
       
-      router.push('/dashboard/my-garden');
+      success = true;
 
     } catch (error) {
       console.error('Erro ao adicionar planta:', error);
@@ -155,6 +157,9 @@ export default function AddPlantPage() {
       });
     } finally {
        setIsSubmitting(false);
+       if(success) {
+        router.push('/dashboard/my-garden');
+       }
     }
   };
 
