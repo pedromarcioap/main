@@ -20,7 +20,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 interface AuthError extends Error {
   code?: string;
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Fallback: create a user object without Firestore data.
         // This allows the user to log in even if the database is temporarily unavailable.
         return {
-            id: firebaseUser.uid,
+            id: firebaseUser.uid, // Manter o ID do usuário autenticado
             name: firebaseUser.displayName || 'Usuário',
             email: firebaseUser.email!,
             nickname: '',
@@ -138,6 +138,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => unsubscribe();
   }, [getOrCreateUser, isDevMode]);
+
+  // Efeito de Diagnóstico para Conexão com o Firestore
+  useEffect(() => {
+    if (user?.id) {
+      console.log(`[Diagnóstico] Tentando ouvir o documento do usuário: users/${user.id}`);
+      const userRef = doc(db, 'users', user.id);
+      const unsubscribe = onSnapshot(userRef,
+        (doc) => {
+          console.log('[Diagnóstico] Conexão com Firestore bem-sucedida. Dados recebidos:', doc.data());
+        },
+        (error) => {
+          console.error('[Diagnóstico] Erro na conexão com o Firestore:', error);
+        }
+      );
+      return () => unsubscribe();
+    }
+  }, [user?.id]);
 
 
   const loginWithEmail = async (email: string, pass: string) => {

@@ -27,7 +27,7 @@ export default function MyGardenPage() {
               <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0">
                   <Image 
-                    src={plant.photoDataUri || 'https://placehold.co/600x400.png'}
+                    src={plant.photoURL || 'https://placehold.co/600x400.png'}
                     alt={plant.nickname}
                     width={600}
                     height={400}

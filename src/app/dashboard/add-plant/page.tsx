@@ -7,6 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { analyzePlantImage } from '@/ai/flows/analyze-plant-image';
 import { useAuth } from '@/hooks/use-auth';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Plant, User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,13 +90,20 @@ export default function AddPlantPage() {
     setIsSubmitting(true);
 
     try {
+      // 1. Upload da imagem para o Firebase Storage
+      const storageRef = ref(storage, `plants/${user.id}/${crypto.randomUUID()}-${photoFile.name}`);
+      const uploadResult = await uploadBytes(storageRef, photoFile);
+      const photoURL = await getDownloadURL(uploadResult.ref);
+
+      // 2. Análise da IA (ainda usa base64, pois a IA precisa dos dados da imagem)
       const base64Photo = await fileToDataUri(photoFile);
       const analysisResult = await analyzePlantImage({ photoDataUri: base64Photo });
 
+      // 3. Criação do objeto Plant com a URL do Storage
       const newPlant: Plant = {
         id: crypto.randomUUID(),
         nickname: data.nickname,
-        photoDataUri: base64Photo,
+        photoURL: photoURL, // Usar a URL do Storage
         addedDate: new Date().toISOString(),
         ...analysisResult,
       };

@@ -87,7 +87,7 @@ const analyzePlantImagePrompt = ai.definePrompt({
 
    Siga estritamente o schema JSON de saída. Para cada campo, forneça uma resposta clara, concisa e de alta precisão técnica. Se uma informação não for claramente visível (ex: solo), indique explicitamente "Não visível na imagem".
 
-   - species: Identifique a espécie da planta com a maior precisão possível.
+   - species: Identifique a espécie da planta. Use seu conhecimento interno e simule uma busca em uma base de dados botânica para confirmar a identificação e obter o nome científico e comum.
    - health: Avalie a saúde geral. Use apenas "Saudável", "Problemas menores" ou "Não saudável".
    - potentialProblems: Descreva quaisquer problemas visíveis (ex: folhas amareladas, manchas, necrose, galhos secos). Seja detalhista.
    - detailedDiagnosis: Elabore um diagnóstico detalhado. Analise a coloração e turgor das folhas para identificar potenciais deficiências nutricionais (ex: falta de nitrogênio, ferro, magnésio) ou estresse hídrico. Seja específico e justifique sua análise.

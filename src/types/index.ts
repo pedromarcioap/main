@@ -15,7 +15,7 @@ export interface User {
 
 export interface Plant extends AnalyzePlantImageOutput {
   id: string;
-  photoDataUri: string;
+  photoURL: string;
   nickname: string;
   addedDate: string;
 }

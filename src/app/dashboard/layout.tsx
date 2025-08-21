@@ -64,7 +64,6 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: '/dashboard', label: 'Início', icon: Home },
     { href: '/dashboard/my-garden', label: 'Meu Jardim', icon: Flower2 },
-    { href: '/dashboard/add-plant', label: 'Adicionar Planta', icon: PlusCircle },
     { href: '/dashboard/chat', label: 'Fale com a Izy', icon: Bot },
     { href: '/dashboard/achievements', label: 'Conquistas', icon: BookHeart },
     { href: '/dashboard/profile', label: 'Meu Perfil', icon: User },
