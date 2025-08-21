@@ -74,11 +74,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const getOrCreateUser = useCallback(async (firebaseUser: FirebaseUser): Promise<User> => {
     const userRef = doc(db, 'users', firebaseUser.uid);
     try {
+        console.log('[AuthContext] Attempting to get user document for:', firebaseUser.uid);
         const userDoc = await getDoc(userRef);
 
         if (userDoc.exists()) {
+            console.log('[AuthContext] User document found:', userDoc.data());
             return { id: userDoc.id, ...userDoc.data() } as User;
         } else {
+            console.log('[AuthContext] User document not found, creating new user:', firebaseUser.uid);
             const newUser: User = {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || 'Usuário',
@@ -92,24 +95,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 chatHistory: [],
             };
             await setDoc(userRef, newUser);
+            console.log('[AuthContext] New user document created.');
             return newUser;
         }
     } catch (error) {
-        console.warn("Firestore is offline or unreachable. Using fallback user data.", error);
-        // Fallback: create a user object without Firestore data.
-        // This allows the user to log in even if the database is temporarily unavailable.
-        return {
-            id: firebaseUser.uid, // Manter o ID do usuário autenticado
-            name: firebaseUser.displayName || 'Usuário',
-            email: firebaseUser.email!,
-            nickname: '',
-            phone: '',
-            photoURL: firebaseUser.photoURL || '',
-            plants: [],
-            journal: [],
-            achievements: [],
-            chatHistory: [],
-        };
+        console.error("[AuthContext] Error in getOrCreateUser:", error);
+        if ((error as AuthError).code === 'unavailable') {
+            console.warn("Firestore is offline or unreachable. Using fallback user data.", error);
+            // Fallback: create a user object without Firestore data.
+            // This allows the user to log in even if the database is temporarily unavailable.
+            return {
+                id: firebaseUser.uid, // Manter o ID do usuário autenticado
+                name: firebaseUser.displayName || 'Usuário',
+                email: firebaseUser.email!,
+                nickname: '',
+                phone: '',
+                photoURL: firebaseUser.photoURL || '',
+                plants: [],
+                journal: [],
+                achievements: [],
+                chatHistory: [],
+            };
+        }
+        throw error; // Re-throw other errors
     }
 }, []);
 
