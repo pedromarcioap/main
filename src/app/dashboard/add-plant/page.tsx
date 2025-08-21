@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { analyzePlantImage } from '@/ai/flows/analyze-plant-image';
 import { useAuth } from '@/hooks/use-auth';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { Plant, User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,14 +41,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const fileToDataUri = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
 
 
 export default function AddPlantPage() {
@@ -90,64 +83,52 @@ export default function AddPlantPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Upload da imagem para o Firebase Storage
-      const storageRef = ref(storage, `plants/${user.id}/${crypto.randomUUID()}-${photoFile.name}`);
+      console.log('Passo 1: Upload da imagem para o Firebase Storage...');
+      const storageRef = ref(
+        storage,
+        `plants/${user.id}/${crypto.randomUUID()}-${photoFile.name}`
+      );
       const uploadResult = await uploadBytes(storageRef, photoFile);
       const photoURL = await getDownloadURL(uploadResult.ref);
+      console.log('Upload concluído. URL da foto:', photoURL);
 
-      // 2. Análise da IA (ainda usa base64, pois a IA precisa dos dados da imagem)
-      const base64Photo = await fileToDataUri(photoFile);
-      const analysisResult = await analyzePlantImage({ photoDataUri: base64Photo });
+      console.log('Passo 2: Chamando a API de análise...');
+      const formData = new FormData();
+      formData.append('photo', photoFile);
 
-      // 3. Criação do objeto Plant com a URL do Storage
-      const newPlant: Plant = {
-        id: crypto.randomUUID(),
+      const response = await fetch('/api/analyze-plant', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('Resposta da API recebida. Status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Erro da API de análise:', errorData);
+        throw new Error(
+          errorData.error || 'A análise da planta falhou.'
+        );
+      }
+
+      const analysisResult = await response.json();
+      console.log('Análise concluída:', analysisResult);
+
+      console.log('Passo 3: Salvando os dados da planta no Firestore...');
+      const newPlantData = {
+        // Não geramos ID de planta aqui, o Firestore fará isso
+        userId: user.id,
         nickname: data.nickname,
-        photoURL: photoURL, // Usar a URL do Storage
+        photoURL: photoURL,
         addedDate: new Date().toISOString(),
         ...analysisResult,
       };
 
-      const newPlants = [...user.plants, newPlant];
-      const currentAchievements = [...user.achievements];
-      const newAchievements: string[] = [];
+      // Usando addDoc para que o Firestore gere o ID do documento
+      const docRef = await addDoc(collection(db, 'plants'), newPlantData);
+      console.log('Planta salva no Firestore com o ID:', docRef.id);
 
-      if (!currentAchievements.includes('first-sprout')) {
-        newAchievements.push('first-sprout');
-      }
-      if (newPlants.length >= 5 && !currentAchievements.includes('green-thumb')) {
-        newAchievements.push('green-thumb');
-      }
-      if (newPlants.length >= 10 && !currentAchievements.includes('enthusiast-collector')) {
-        newAchievements.push('enthusiast-collector');
-      }
-      if (newPlants.length >= 25 && !currentAchievements.includes('master-botanist')) {
-        newAchievements.push('master-botanist');
-      }
-      
-      const updatedUser: User = {
-        ...user,
-        plants: newPlants,
-        achievements: [...currentAchievements, ...newAchievements],
-      };
 
-      await updateUser(updatedUser);
-
-      if (newAchievements.length > 0) {
-        const achievementMessages: {[key: string]: string} = {
-            'first-sprout': 'Primeiro Broto: Você adicionou sua primeira planta!',
-            'green-thumb': 'Dedo Verde: Você aumentou sua coleção para 5 plantas!',
-            'enthusiast-collector': 'Colecionador Entusiasta: Você tem 10 plantas!',
-            'master-botanist': 'Mestre Botânico: Sua coleção chegou a 25 plantas!'
-        }
-        
-        newAchievements.forEach(id => {
-            toast({
-              title: 'Nova Conquista!',
-              description: achievementMessages[id],
-            });
-        })
-      }
 
       toast({
         title: 'Planta Adicionada!',
